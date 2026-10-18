@@ -297,7 +297,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.18-2240';
+const APP_VER='2026.10.18-2244';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -446,7 +446,13 @@ function estStart(id,p){const e=EX[id];const lf=(LEVELF[p.level]||1)*ageF(p.age)
   if(e.k==='load')return Math.max(e.inc,roundTo(bw*e.r[f]*lf,e.inc));
   if(e.k==='assist')return roundTo(Math.max(0,bw*e.r[f]-(lf-1)*.25*bw),e.inc);
   return 0}
-function genRule(p){
+const INJURY=[[/발목|아킬레스|족저/,'발목',['calf_raise','calf_bw','step_up','lunge','bss','goblet_squat','back_squat']],
+ [/무릎|슬개|십자인대|반월/,'무릎',['leg_ext','lunge','bss','back_squat','step_up','goblet_squat']],
+ [/허리|디스크|요통/,'허리',['back_squat','db_rdl','back_ext','superman','hip_thrust']],
+ [/어깨|회전근|충돌/,'어깨',['shoulder_press_m','db_ohp','bench_dip','lat_raise','bench','pec_deck']],
+ [/손목|팔꿈치|엘보/,'손목·팔꿈치',['pushup','bench_dip','db_curl','pushdown']]];
+function injuryBlock(notes){const n=String(notes||'');const hit=INJURY.filter(([re])=>re.test(n));return{names:hit.map(x=>x[1]),ex:new Set(hit.flatMap(x=>x[2]))}}
+function genRule(p){const inj=injuryBlock(p.notes);
   const days=Math.min(5,Math.max(2,+p.days||3));const g=GOALS[p.goal]||GOALS['균형·체력'];const mins=+p.minutes||60;
   const n=mins<=40?4:mins<=50?5:mins<=60?6:7;const home=p.env==='홈(덤벨·맨몸)';const age=+p.age||0;
   const beg=p.level==='초급'||(age&&age<18);const older=age>=55;
@@ -455,7 +461,7 @@ function genRule(p){
       if(beg&&EX[id].beg)id=EX[id].beg;
       if(home&&!['덤벨','맨몸'].includes(EX[id].eq))id=EX[id].alt||id;
       if(home&&!['덤벨','맨몸'].includes(EX[id].eq))continue;
-      if(used.has(id)||!EX[id])continue;used.add(id);
+      if(used.has(id)||!EX[id]||inj.ex.has(id))continue;used.add(id);
       const e=EX[id];const acc=e.p==='코어'||e.k==='bw'||e.k==='time'||['cable_er','db_er','rev_wrist','face_pull','lat_raise','calf_raise','calf_bw','hip_abd'].includes(id);
       let min=acc?10:g.min,max=acc?15:g.max;if((beg||older)&&p.goal==='근력'&&!acc){min=8;max=10}
       if(e.k==='time'){min=beg?20:30;max=beg?30:45}
@@ -465,6 +471,7 @@ function genRule(p){
   const notes=['시작 무게는 체중·수준·나이로 추정한 값이에요. 첫 회차에 마지막 2~3회가 힘든 무게로 조정하세요.'];
   if(age&&age<18)notes.push('성장기라 최대 무게 테스트는 하지 말고 자세 위주로 진행하세요.');
   if(older)notes.push('휴식을 15초 늘렸고, 관절 워밍업을 길게 잡았어요.');
+  if(inj.names.length)notes.push(`특이사항(${inj.names.join('·')})을 반영해 부담되는 운동을 뺐어요. 통증이 있으면 중단하고 전문가와 상의하세요.`);
   return{title:`${p.goal||'균형·체력'} · 주 ${days}회`,source:'rule',startDate:today(),ramp:beg,days:out,notes:notes.join(' ')}}
 
 /* ---------- 점진적 증량 ---------- */
