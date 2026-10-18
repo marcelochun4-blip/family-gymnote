@@ -239,6 +239,10 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 :root[data-skin="power"] h1,:root[data-skin="power"] h2{letter-spacing:.02em}
 :root[data-skin="power"] .btn.pri{box-shadow:4px 4px 0 var(--acc2)}
 :root[data-skin="power"] .meter,:root[data-skin="power"] .meter i{border-radius:0}
+.iconbtn{width:38px;height:38px;border-radius:50%;border:var(--bw) solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+.iconbtn.spin svg{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.updbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:13;background:var(--ink);color:var(--bg);border-radius:999px;padding:8px 8px 8px 16px;display:flex;gap:10px;align-items:center;font-size:14px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.updbar button{border:0;border-radius:999px;padding:6px 12px;background:var(--me);color:var(--me-ink);font-weight:700;cursor:pointer}
 .skins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .skin{border:2px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
 .skin[aria-pressed="true"]{border-color:var(--me);box-shadow:0 0 0 2px var(--me)}
@@ -250,18 +254,19 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 <body>
 <div class="wrap">
   <header class="top" id="top" hidden>
-    <div class="brand"><h1>우리집 짐노트</h1><button class="who" id="whoBtn" data-act="tab" data-tab="me"></button></div>
+    <div class="brand"><h1>우리집 짐노트</h1><div class="row" style="gap:8px;flex-wrap:nowrap"><button class="iconbtn" data-act="refresh" aria-label="새로고침" title="새로고침"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button><button class="who" id="whoBtn" data-act="tab" data-tab="me"></button></div></div>
   </header>
   <main id="main"><div class="empty"><h3>불러오는 중</h3></div></main>
 </div>
 <div id="timerSlot"></div>
 <div id="sheetSlot"></div>
 <div id="toastSlot"></div>
+<div id="updSlot"></div>
 <nav class="tabbar" aria-label="메뉴" id="tabbar" hidden><div class="in" id="tabs"></div></nav>
 
 <script>
 "use strict";
-const APP_VER='2026.10.18-6';
+const APP_VER='2026.10.18-2000';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -714,6 +719,8 @@ async function onClick(ev){
    case'join':{S.login.busy=true;render();try{const r=await api('gn_join',{p_code:S.login.code,p_member:a.dataset.id});S.token=r.token;lsSet('gn_token',r.token);S.me=r.member;lsSet('gn_me',r.member);S.view=r.member;S.tab='home';await load()}catch(e){S.login.err=e.msg;S.login.busy=false}break}
    case'skin':{const t=a.dataset.s;lsSet('gn_skin',t);const m=M(S.me);const prev=m.profile?.theme;m.profile={...(m.profile||{}),theme:t};render();
      if(!(await act('gn_save_member',{p_id:S.me,p_name:m.name,p_color:m.color,p_profile:m.profile},'테마를 바꿨어요'))){m.profile.theme=prev}break}
+   case'refresh':{a.classList.add('spin');const up=await checkUpdate(true);if(!up)await load();a.classList.remove('spin');return}
+   case'doUpdate':if(S.session){toast('진행 중인 운동을 먼저 저장하거나 취소하세요');return}await hardReload(a.dataset.v);return;
    case'retry':S.loadErr=null;render();await load();return;
    case'loginBack':S.login={step:1,code:'',list:null,busy:false,err:''};break;
    case'logout':if(S.confirm!=='logout'){S.confirm='logout';break}try{await api('gn_logout',{p_token:S.token})}catch(e){}logoutLocal();lsSet('gn_sess',null);S.session=null;break;
@@ -778,11 +785,23 @@ document.addEventListener('submit',async ev=>{ev.preventDefault();const f=ev.tar
   else if(f.dataset.form==='add'){const r=await act('gn_add_member',{p_name:v('a_name'),p_color:v('a_color')},'구성원을 추가했어요');if(r){S.addMember=false;S.view=r;S.meSeg='plan';S.profEdit=true}render()}
   else if(f.dataset.form==='cheer'){const msg=v('cm_'+f.dataset.log);if(!msg)return;if(await act('gn_cheer',{p_log:f.dataset.log,p_emoji:'💬',p_msg:msg},'칭찬을 보냈어요'))S.openMsg=null;render()}});
 
+/* ---------- 자동 업데이트 ---------- */
+async function serverVer(){try{const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return (await r.json()).v||null}catch(e){return null}}
+async function hardReload(v){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}
+  try{const r=await navigator.serviceWorker?.getRegistration();await r?.update()}catch(e){}
+  location.replace(location.pathname+'?v='+encodeURIComponent(v||Date.now()))}
+async function checkUpdate(manual){const v=await serverVer();
+  if(!v||v===APP_VER){$('#updSlot').innerHTML='';if(manual)toast('최신 버전이에요');return false}
+  const tried=lsGet('gn_upd_try')||{};const recent=tried.v===v&&Date.now()-tried.t<120000;
+  if(manual||(!S.session&&!recent)){lsSet('gn_upd_try',{v,t:Date.now()});await hardReload(v);return true}
+  $('#updSlot').innerHTML=`<div class="updbar">새 버전이 있어요<button data-act="doUpdate" data-v="${esc(v)}">${S.session?'운동 저장 후 적용':'지금 적용'}</button></div>`;return true}
 /* ---------- 시작 ---------- */
 S.session=(()=>{const d=lsGet('gn_sess');return d&&d.member===S.me?d:null})();
+if(location.search.includes('v='))history.replaceState(null,'',location.pathname);
 if(S.token)load();else render();
-setInterval(()=>{if(document.visibilityState==='visible'&&S.token)load(true)},30000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.token)load(true)});
+checkUpdate(false);
+setInterval(()=>{if(document.visibilityState==='visible'){if(S.token)load(true);checkUpdate(false)}},30000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){checkUpdate(false);if(S.token)load(true)}});
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>r.update()).catch(()=>{}));
 </script>
 </body>
