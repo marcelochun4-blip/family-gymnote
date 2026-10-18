@@ -244,6 +244,36 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 .iconbtn.spin svg{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .updbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:13;background:var(--ink);color:var(--bg);border-radius:999px;padding:8px 8px 8px 16px;display:flex;gap:10px;align-items:center;font-size:14px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.25)}
 .updbar button{border:0;border-radius:999px;padding:6px 12px;background:var(--me);color:var(--me-ink);font-weight:700;cursor:pointer}
+.streak{gap:10px}
+.flame{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;position:relative;background:var(--sunk);flex:none;filter:grayscale(1);opacity:.6}
+.flame.on{background:radial-gradient(circle at 50% 70%,#ffb70355,transparent 70%);filter:none;opacity:1}
+.flame .fl-ico{font-size:34px;line-height:1}
+.flame.on .fl-ico{animation:flick 1.6s ease-in-out infinite;display:inline-block;transform-origin:50% 90%}
+.flame .num{position:absolute;bottom:-4px;right:-6px;background:var(--me);color:var(--me-ink);border-radius:999px;font-size:13px;padding:1px 8px;min-width:26px;text-align:center}
+@keyframes flick{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.08) rotate(2deg)}}
+.frz{display:flex;flex-direction:column;align-items:center;font-size:22px;line-height:1.1;flex:none}.frz b{font-size:12px}
+.streak.risk{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+.streak .risk{color:var(--bad);font-weight:700}
+.sdays{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:2px}
+.sday{display:flex;flex-direction:column;align-items:center;gap:2px}
+.sday i{font-style:normal;font-size:15px;width:100%;aspect-ratio:1;max-width:26px;display:grid;place-items:center;border-radius:8px;background:var(--sunk)}
+.sday.fire i{background:color-mix(in srgb,#ff8a00 22%,transparent)}.sday.freeze i{background:color-mix(in srgb,#5bc0ff 25%,transparent)}
+.sday.none i,.sday.today i{color:var(--muted);font-size:12px}
+.sday b{font-size:10px;color:var(--muted);font-weight:600}
+.flm{font-size:12px;font-weight:700;color:#ff7a00;margin-left:4px}
+.celebrate{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%,#ff8a0040,#000000cc 70%);animation:cbin .3s ease-out}
+.celebrate.out{opacity:0;transition:opacity .35s}
+.celebrate canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cb-box{position:relative;text-align:center;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px;padding:24px}
+.cb-flame{font-size:120px;line-height:1;animation:cbflame 1.2s cubic-bezier(.2,1.6,.4,1) both,flick 1.6s ease-in-out 1.2s infinite;filter:drop-shadow(0 0 30px #ff8a00)}
+.cb-num{font-size:84px;line-height:1;font-weight:900;text-shadow:0 4px 24px #ff5a0099}
+.cb-num.pop{animation:cbpop .5s cubic-bezier(.2,1.8,.4,1)}
+.cb-t{font-size:22px;font-weight:800}
+.cb-ms{margin-top:6px;background:linear-gradient(90deg,#f7c948,#ff7ad9);color:#1c1300;font-weight:800;padding:6px 16px;border-radius:999px}
+.cb-sub{opacity:.9;font-weight:600}
+@keyframes cbin{from{opacity:0}}
+@keyframes cbflame{0%{transform:scale(.2) translateY(60px);opacity:0}60%{transform:scale(1.25)}100%{transform:scale(1);opacity:1}}
+@keyframes cbpop{0%{transform:scale(1)}40%{transform:scale(1.6);color:#ffd166}100%{transform:scale(1)}}
 .skins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .skin{border:2px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
 .skin[aria-pressed="true"]{border-color:var(--me);box-shadow:0 0 0 2px var(--me)}
@@ -267,7 +297,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.18-2233';
+const APP_VER='2026.10.18-2240';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -388,7 +418,7 @@ function targetDays(id){return +P(id).days||S.routines[id]?.days?.length||3}
 
 /* ---------- 서버 ---------- */
 const ERR={bad_code:'가족 코드가 맞지 않아요.',too_many_attempts:'시도가 너무 많아요. 10분 뒤에 다시 해주세요.',auth_required:'로그인이 만료됐어요. 다시 로그인해주세요.',
-  self_cheer:'내 기록에는 칭찬할 수 없어요.',not_yours:'내 기록만 지울 수 있어요.',too_large:'내용이 너무 길어요.',bad_name:'이름을 1~30자로 입력하세요.',slow_down:'칭찬을 너무 빨리 보내고 있어요.',no_member:'없는 구성원이에요.'};
+  self_cheer:'내 기록에는 칭찬할 수 없어요.',not_yours:'내 기록만 지울 수 있어요.',too_large:'내용이 너무 길어요.',bad_name:'이름을 1~30자로 입력하세요.',slow_down:'요청이 너무 많아요. 잠시 후 다시 해주세요.',no_member:'없는 구성원이에요.'};
 async function api(fn,body){
   let r;try{r=await fetch(`${SB_URL}/rest/v1/rpc/${fn}`,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})})}
   catch(e){throw{msg:'인터넷 연결을 확인해주세요.',offline:true}}
@@ -397,10 +427,10 @@ async function api(fn,body){
   return j}
 async function load(silent){
   if(!S.token)return;
-  try{const st=await api('gn_state',{p_token:S.token,p_days:200});
+  try{const st=await api('gn_state',{p_token:S.token,p_days:400});
     const mem={};st.members.forEach(m=>mem[m.id]=m);S.members=mem;S.routines=st.routines||{};
     S.logs=(st.logs||[]).map(l=>({...(l.data||{}),id:l.id,member:l.member,date:l.date,ts:l.ts}));S.cheers=st.cheers||[];
-    S.me=st.me;lsSet('gn_me',S.me);if(!S.view||!mem[S.view])S.view=S.me;S.loaded=true;
+    S.me=st.me;lsSet('gn_me',S.me);try{S.aiReqs=await api('gn_ai_requests_list',{p_token:S.token})||[]}catch(e){S.aiReqs=S.aiReqs||[]}if(!S.view||!mem[S.view])S.view=S.me;S.loaded=true;
     const busyForm=document.querySelector('#main [data-dirty]')||document.querySelector('#main form.prof')||S.edit||S.openMsg;
     if(!(silent&&((S.tab==='work'&&S.session)||busyForm)))render()}
   catch(e){if(!silent||e.auth)toast(e.msg);if(e.auth||!S.loaded){S.loadErr=e.msg;render()}}}
@@ -452,6 +482,47 @@ function progress(it,entry){
 /* ---------- 성취도 ---------- */
 function bestBefore(id,ex,beforeTs){let b=null;logsOf(id).forEach(l=>{if(l.ts>=beforeTs)return;(l.entries||[]).forEach(en=>{if(en.ex!==ex)return;en.sets.forEach(s=>{const w=+s.w||0;if(EX[ex]?.k==='load'&&w>0&&(b==null||w>b))b=w})})});return b}
 function prsOf(id,sinceTs){const out=[];logsOf(id).filter(l=>l.ts>=sinceTs).forEach(l=>(l.entries||[]).forEach(en=>{if(EX[en.ex]?.k!=='load')return;const w=Math.max(0,...en.sets.map(s=>+s.w||0));const b=bestBefore(id,en.ex,l.ts);if(b!=null&&w>b)out.push({ex:en.ex,w,prev:b,date:l.date})}));return out}
+/* ---------- 스트릭 (듀오링고식) ----------
+ 운동한 날 🔥. 운동 안 한 날은 주 목표에 맞는 휴식 허용일 수(주2회↓ 3일, 그 외 2일)까지 💤로 이어짐.
+ 허용을 넘기면 스트릭 프리즈 🧊가 자동으로 하루를 막아줌. 운동 5회마다 프리즈 1개(최대 2개). 없으면 끊김. */
+const FREEZE_EVERY=5,FREEZE_MAX=2;
+function streakOf(id){
+  const dates=new Set(logsOf(id).map(l=>String(l.date).slice(0,10)));const t=targetDays(id);const maxRest=t<=2?3:2;
+  const td=today();const res={streak:0,best:0,freezes:0,days:{},todayDone:dates.has(td),todayState:'none',restLeft:0,nextFreezeIn:FREEZE_EVERY,total:0};
+  if(!dates.size)return res;
+  const first=[...dates].sort()[0];let d=parseD(first),streak=0,best=0,freezes=0,workouts=0,restRun=0;
+  while(dstr(d)<=td){const s=dstr(d);
+    if(dates.has(s)){streak++;workouts++;restRun=0;res.days[s]='fire';if(workouts%FREEZE_EVERY===0&&freezes<FREEZE_MAX)freezes++}
+    else if(s===td){res.days[s]='today'}
+    else if(streak===0){res.days[s]='none'}
+    else{restRun++;if(restRun<=maxRest){streak++;res.days[s]='rest'}else if(freezes>0){freezes--;streak++;res.days[s]='freeze'}else{streak=0;restRun=0;res.days[s]='broken'}}
+    best=Math.max(best,streak);d=addDays(d,1)}
+  res.streak=streak;res.best=best;res.freezes=freezes;res.total=workouts;res.nextFreezeIn=FREEZE_EVERY-(workouts%FREEZE_EVERY);
+  if(res.todayDone)res.todayState='done';
+  else if(streak===0)res.todayState='start';
+  else if(restRun+1<=maxRest){res.todayState='rest';res.restLeft=maxRest-restRun-1}
+  else if(freezes>0)res.todayState='freeze';
+  else res.todayState='risk';
+  return res}
+const DAYICON={fire:'🔥',rest:'💤',freeze:'🧊',broken:'💔',none:'·',today:'○'};
+function streakCard(id,compact){const s=streakOf(id);const td=today();
+  const msg={done:'오늘 운동 완료! 스트릭이 지켜졌어요',start:'오늘 운동하면 스트릭이 시작돼요',rest:`오늘은 쉬어도 스트릭 유지 (오늘 포함 ${s.restLeft+1}일까지)`,freeze:`오늘 쉬면 프리즈 🧊 1개가 사용돼요`,risk:'오늘 운동 안 하면 스트릭이 끊겨요!'}[s.todayState];
+  const days=[...Array(14)].map((_,i)=>{const d=addDays(parseD(td),i-13);const k=dstr(d);const st=s.days[k]||'none';return`<span class="sday ${st}" title="${k}"><i>${DAYICON[st]}</i><b>${DOW[d.getDay()]}</b></span>`}).join('');
+  return`<section class="card streak ${s.todayState}"><div class="row between" style="flex-wrap:nowrap"><div class="flame ${s.streak?'on':''}"><span class="fl-ico">🔥</span><span class="num">${s.streak}</span></div>
+   <div style="flex:1;min-width:0"><div class="lbl">연속 스트릭</div><h3>${s.streak}일 연속</h3><p class="small ${s.todayState==='risk'?'risk':'muted'}">${msg}</p></div>
+   <div class="frz" title="스트릭 프리즈"><span>🧊</span><b class="num">${s.freezes}/${FREEZE_MAX}</b></div></div>
+   ${compact?'':`<div class="sdays">${days}</div><p class="small muted">최고 기록 ${s.best}일 · 다음 프리즈까지 운동 ${s.nextFreezeIn}회 · 주 ${targetDays(id)}회 목표라 연속 휴식 ${targetDays(id)<=2?3:2}일까지 스트릭 유지</p>`}</section>`}
+function celebrate(prev,cur,earnedFreeze){
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;const ms=[7,14,30,50,100,200,365].find(x=>cur.streak===x);
+  const el=document.createElement('div');el.className='celebrate';el.innerHTML=`<canvas></canvas><div class="cb-box"><div class="cb-flame">🔥</div><div class="cb-num num" id="cbNum">${prev}</div><div class="cb-t">${cur.streak>prev?'일 연속 스트릭!':'오늘도 해냈어요!'}</div>
+    ${ms?`<div class="cb-ms">🏆 ${ms}일 달성!</div>`:''}${earnedFreeze?`<div class="cb-sub">🧊 스트릭 프리즈 1개 획득</div>`:''}<div class="cb-sub small">화면을 눌러 닫기</div></div>`;
+  document.body.appendChild(el);try{navigator.vibrate&&navigator.vibrate([30,60,30,60,120])}catch(e){}
+  const close=()=>{el.classList.add('out');setTimeout(()=>el.remove(),350)};el.addEventListener('click',close);setTimeout(close,5200);
+  const num=el.querySelector('#cbNum');setTimeout(()=>{num.textContent=cur.streak;num.classList.add('pop')},reduce?0:700);
+  if(reduce)return;const cv=el.querySelector('canvas'),cx=cv.getContext('2d');const W=cv.width=innerWidth*devicePixelRatio,H=cv.height=innerHeight*devicePixelRatio;
+  const cs=getComputedStyle(document.documentElement);const cols=[cs.getPropertyValue('--me').trim()||'#ff4a1c','#ffb703','#ff5c97','#8fd8ff','#5fe3a1','#ffffff'];
+  const P=[...Array(160)].map(()=>({x:W/2,y:H*.42,vx:(Math.random()-.5)*W*.035,vy:-Math.random()*H*.03-H*.008,r:(4+Math.random()*6)*devicePixelRatio,c:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*6,s:(Math.random()-.5)*.3}));
+  const t0=performance.now();(function f(t){const dt=t-t0;cx.clearRect(0,0,W,H);P.forEach(p=>{p.vy+=H*.0009;p.x+=p.vx;p.y+=p.vy;p.vx*=.99;p.a+=p.s;cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.globalAlpha=Math.max(0,1-dt/3800);cx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);cx.restore()});if(dt<3800&&el.isConnected)requestAnimationFrame(f)})(t0)}
 function ach(id){
   const logs=logsOf(id);const t=targetDays(id);const ms=monday(new Date());
   const wk=logs.filter(l=>parseD(l.date)>=ms).length;const weekPct=Math.min(100,Math.round(wk/t*100));
@@ -463,7 +534,7 @@ function ach(id){
   const prs=prsOf(id,since.getTime());const allPr=prsOf(id,0).length;
   const cheersIn=S.cheers.filter(c=>c.to===id).length;const vol=logs.reduce((a,l)=>a+(l.volume||0),0);
   const score=logs.length?Math.round(.4*weekPct+.3*attend+.3*completion):0;
-  const badges=[['첫','첫 운동',logs.length>=1],['10','10회 출석',logs.length>=10],['30','30회 출석',logs.length>=30],['목','주간 목표 달성',streak>=1||wk>=t],['3주','3주 연속 달성',streak>=3],['PR','첫 기록 경신',allPr>=1],['PR5','기록 경신 5회',allPr>=5],['👏','칭찬 10개 받음',cheersIn>=10],['1만','누적 1만kg',vol>=10000]];
+  const badges=[['첫','첫 운동',logs.length>=1],['10','10회 출석',logs.length>=10],['30','30회 출석',logs.length>=30],['목','주간 목표 달성',streak>=1||wk>=t],['3주','3주 연속 달성',streak>=3],['PR','첫 기록 경신',allPr>=1],['PR5','기록 경신 5회',allPr>=5],['👏','칭찬 10개 받음',cheersIn>=10],['1만','누적 1만kg',vol>=10000],['🔥7','7일 스트릭',streakOf(id).best>=7],['🔥30','30일 스트릭',streakOf(id).best>=30],['🔥100','100일 스트릭',streakOf(id).best>=100]];
   return{wk,t,weekPct,attend,completion,streak,prs,allPr,cheersIn,vol,score,total:logs.length,badges}}
 
 /* ---------- 렌더 ---------- */
@@ -507,13 +578,13 @@ function vHome(){
   if(S.session)h+=`<button class="btn pri wide" data-act="tab" data-tab="work">진행 중인 운동 이어하기</button>`;
   else if(nd)h+=`<div><div class="lbl">다음 운동</div><div class="row between"><h3>${esc(nd.key)} · ${esc(nd.title)}</h3><span class="small muted">${nd.items.length}개 운동</span></div></div><button class="btn pri wide" data-act="start" data-day="${esc(nd.key)}">운동 시작</button>`;
   else h+=`<p class="muted">아직 루틴이 없어요. 기록 탭에서 프로필을 입력하고 루틴을 만드세요.</p><button class="btn pri wide" data-act="goPlan">루틴 만들기</button>`;
-  h+=`</section>`;
+  h+=`</section>`+streakCard(S.me);
   const recv=S.cheers.filter(c=>c.to===S.me).slice(-6).reverse();const un=unseenCheers();
   if(recv.length)h+=`<section class="card"><div class="row between"><h3>받은 칭찬${un.length?` <span class="pill bad">새 ${un.length}</span>`:''}</h3>${un.length?`<button class="btn sm ghost" data-act="seenCheers">모두 확인</button>`:''}</div>
    <div class="fam">${recv.map(c=>{const f=M(c.from);const l=S.logs.find(x=>x.id===c.log);return`<div class="famrow" style="--c:${colorVar(f)}"><span class="plate sm"></span><div class="small"><b>${esc(f?.name||'')}</b> ${esc(c.emoji)} ${c.msg?esc(c.msg):''}<div class="muted">${l?md(l.date)+' '+esc(l.dayTitle||''):''}</div></div><span></span></div>`}).join('')}</div></section>`;
   // 가족 순위
   const rank=memberList().map(m=>({m,a:ach(m.id)})).sort((x,y)=>y.a.score-x.a.score);
-  h+=`<section class="card"><div class="row between"><h3>가족 이번 주</h3><button class="btn sm ghost" data-act="tab" data-tab="fam">피드 보기</button></div><div class="fam">${rank.map(({m,a})=>`<div class="famrow" style="--c:${colorVar(m)}"><span class="plate sm"></span><div><div class="row between small"><b>${esc(m.name)}</b><span class="muted">${a.wk}/${a.t}회 · 성취도 ${a.score}</span></div><div class="meter"><i style="width:${a.weekPct}%"></i></div></div><span class="num">${a.weekPct}%</span></div>`).join('')}</div></section>`;
+  h+=`<section class="card"><div class="row between"><h3>가족 이번 주</h3><button class="btn sm ghost" data-act="tab" data-tab="fam">피드 보기</button></div><div class="fam">${rank.map(({m,a})=>`<div class="famrow" style="--c:${colorVar(m)}"><span class="plate sm"></span><div><div class="row between small"><b>${esc(m.name)} <span class="flm">🔥${streakOf(m.id).streak}</span></b><span class="muted">${a.wk}/${a.t}회 · 성취도 ${a.score}</span></div><div class="meter"><i style="width:${a.weekPct}%"></i></div></div><span class="num">${a.weekPct}%</span></div>`).join('')}</div></section>`;
   // 회복
   const now=Date.now(),lastBy={};logsOf(S.me).forEach(l=>(l.entries||[]).forEach(en=>{const p=EX[en.ex]?.p;if(p&&(lastBy[p]==null||l.ts>lastBy[p]))lastBy[p]=l.ts}));
   h+=`<section class="card"><div class="row between"><h3>부위별 회복</h3><span class="small muted">코어 24시간, 나머지 72시간 기준</span></div><div class="recov">${PARTS.map(p=>{const t=lastBy[p];const full=p==='코어'?24:72;const pct=t?Math.min(100,Math.round((now-t)/36e5/full*100)):100;const c=pct>=100?'var(--good)':pct>=60?'var(--warn)':'var(--bad)';return`<div><div class="row between small"><b>${p}</b><span class="num">${pct}%</span></div><div class="meter" style="--c:${c}"><i style="width:${pct}%"></i></div></div>`}).join('')}</div></section>`;
@@ -559,8 +630,10 @@ async function finishSession(){
   if(d)d.items=d.items.map(it=>{const en=s.entries.find(x=>x.ex===it.ex);if(!en)return it;const filled={...en,sets:en.sets.map(x=>({...x,r:x.r===''?(x.done?en.target.max:0):x.r}))};
     const p=progress(it,filled);if(!p)return it;changes.push({n:EX[it.ex]?.n||it.ex,msg:p.msg,tone:p.tone,next:targetText(p.item)});return p.item});
   const data={dayKey:s.dayKey,dayTitle:s.dayTitle,entries,planned,volume:Math.round(vol),durationMin:Math.max(1,Math.round((Date.now()-s.t0)/6e4)),note:String(s.note||'').slice(0,300),warm:!!s.warm,fin:!!s.fin};
-  const ok=await act('gn_add_log',{p_date:s.date,p_data:data,p_routine:rt},'저장하고 가족에게 공유했어요');
+  const st0=streakOf(S.me);
+  const ok=await act('gn_add_log',{p_date:s.date,p_data:data,p_routine:rt});
   if(!ok){render();return}
+  const st1=streakOf(S.me);setTimeout(()=>celebrate(st0.todayDone?st0.streak:st0.streak,st1,st1.freezes>st0.freezes||(st1.total%FREEZE_EVERY===0&&st0.freezes===FREEZE_MAX?false:st1.freezes>st0.freezes)),250);
   lsSet('gn_sess',null);S.session=null;S.timer=null;S.lastProg=changes;S.tab='me';S.meSeg='ach';S.view=S.me;lsSet('gn_tab','me');render();window.scrollTo(0,0)}
 
 let tick;
@@ -626,7 +699,7 @@ function vMe(){
   if(vid===S.me)h+=`<p class="small muted" style="text-align:center">앱 버전 ${APP_VER}</p><div class="row" style="justify-content:center"><button class="btn sm ghost" data-act="logout">${S.confirm==='logout'?'정말 로그아웃':'이 기기에서 로그아웃'}</button></div>`;
   return h}
 function vAch(id){
-  const a=ach(id);const m=M(id);let h='';
+  const a=ach(id);const m=M(id);let h=streakCard(id);
   if(id===S.me&&S.lastProg&&S.lastProg.length)h+=`<section class="card hero"><h3>다음 회차 목표</h3>${S.lastProg.map(c=>`<div class="exline"><span>${esc(c.n)} <span class="pill ${c.tone}">${esc(c.msg)}</span></span><span class="num muted">${esc(c.next)}</span></div>`).join('')}<button class="btn sm ghost" data-act="closeProg">닫기</button></section>`;
   h+=`<section class="card"><div class="row" style="flex-wrap:nowrap;gap:14px"><div class="ring" style="--p:${a.score}"><span>${a.score}</span></div><div class="stats3">
     <div class="stat"><span class="lbl">이번 주</span><span class="num">${a.weekPct}%</span><span class="small muted">${a.wk}/${a.t}회</span></div>
@@ -675,21 +748,26 @@ function vPlan(id){
   if(!editing)h+=`<p class="small muted">운동을 저장하면 다음 회차 목표가 자동으로 바뀌어요. 모든 세트에서 최대 회수를 채우면 한 칸 증량, 절반 넘게 최소 회수에 못 미치면 한 칸 감량. '추정'은 아직 기록 전인 시작값이에요.</p>`;
   return h}
 function vAI(id){const A=S.ai;
-  let h=`<section class="card"><div><div class="lbl">AI 맞춤</div><h3>원하는 대로 루틴 만들기</h3></div>
-   <p class="small muted">하고 싶은 것, 피하고 싶은 것, 부상·통증을 자유롭게 쓰고 인바디 결과지 사진이나 PDF를 올리면 함께 반영해요.</p>
+  let h=`<section class="card"><div><div class="lbl">AI 맞춤</div><h3>원하는 대로 루틴 요청하기</h3></div>
+   <p class="small muted">하고 싶은 것, 피하고 싶은 것, 부상·통증을 자유롭게 쓰고 인바디 결과지 사진이나 PDF를 올리면 Claude가 함께 반영해서 만들어줘요. 완성되면 이 화면에 미리보기가 떠요.</p>
    <form data-form="ai" class="fl" style="gap:10px"><textarea id="aiPrompt" data-in="aiPrompt" placeholder="예) 무릎이 안 좋아서 점프·깊은 스쿼트는 빼고, 상체 위주로 주 4회. 팔뚝 살 빼고 싶어요." ${A.busy?'disabled':''}>${esc(A.prompt)}</textarea>
    <label class="btn" for="aiFile" style="text-align:center">${A.file?'📎 '+esc(A.file.name)+' ('+Math.round(A.file.size/1024)+'KB) · 바꾸기':'📎 인바디·검사지 사진 또는 PDF 올리기 (선택)'}</label>
    <input id="aiFile" type="file" accept="image/*,application/pdf" hidden>
    ${A.file?`<button type="button" class="btn sm ghost" data-act="aiClearFile" style="align-self:flex-start">첨부 빼기</button>`:''}
-   <button class="btn pri wide" type="submit" ${A.busy?'disabled':''}>${A.busy?'AI가 루틴을 설계하는 중… (20~40초)':'AI로 루틴 만들기'}</button></form>
+   <button class="btn pri wide" type="submit" ${A.busy?'disabled':''}>${A.busy?'보내는 중…':'Claude에게 루틴 요청'}</button></form>
    ${A.err?`<p class="small" style="color:var(--bad)">${esc(A.err)}</p>`:''}</section>`;
-  const P0=A.preview;if(P0&&P0.member===id){const r=P0.rt,x=P0.extracted||{};
-    h+=`<section class="card hero"><div class="lbl">AI 제안 · 아직 저장 안 됨</div><h2>${esc(r.title)}</h2>${r.summary?`<p class="small">${esc(r.summary)}</p>`:''}
+  const reqs=(S.aiReqs||[]).filter(r=>r.member===id);
+  reqs.filter(r=>r.status==='pending').forEach(r=>{h+=`<section class="card"><div class="row between"><div><div class="lbl">AI 요청 접수됨 · ${md(dstr(new Date(r.ts)))}</div><h3>Claude가 루틴을 만드는 중</h3></div><span class="pill warn">대기</span></div>
+    <p class="small muted">${esc((r.prompt||'').slice(0,120))}${r.file_name?' · 📎 '+esc(r.file_name):''}</p><p class="small muted">시완이 Claude 채팅에서 "짐노트 AI 요청 처리해줘"라고 하면 완성돼요.</p></section>`});
+  let P0=A.preview;const doneReq=reqs.find(r=>r.status==='done'&&r.result);
+  if(!P0&&doneReq){try{P0={member:id,req:doneReq.id,rt:aiNormalize(doneReq.result,P(id)),extracted:doneReq.result.extracted||{}}}catch(e){P0=null}}
+  if(P0&&P0.member===id){const r=P0.rt,x=P0.extracted||{};
+    h+=`<section class="card hero"><div class="lbl">Claude 제안 · 아직 저장 안 됨</div><h2>${esc(r.title)}</h2>${r.summary?`<p class="small">${esc(r.summary)}</p>`:''}
     ${(x.weight||x.bodyFat||x.muscle||x.other)?`<div class="notice"><b>첨부에서 읽은 값</b><br>${[x.weight&&'체중 '+x.weight+'kg',x.bodyFat&&'체지방률 '+x.bodyFat+'%',x.muscle&&'골격근량 '+x.muscle+'kg'].filter(Boolean).join(' · ')}${x.other?'<br>'+esc(x.other):''}
       ${(x.weight||x.bodyFat)?`<label class="row small" style="margin-top:6px"><input type="checkbox" id="aiApplyProf" data-chk="aiApplyProf" ${A.applyProf?'checked':''}> 이 값으로 프로필 체중·체지방률 업데이트</label>`:''}</div>`:''}
     ${r.days.map(d=>`<div><b>${esc(d.key)}${d.dow?' · '+esc(d.dow)+'요일':''} · ${esc(d.title)}</b>${d.focus?`<div class="small muted">${esc(d.focus)}</div>`:''}${d.items.map(it=>`<div class="exline"><span>${esc(EX[it.ex].n)}</span><span class="num muted">${esc(targetText(it))}</span></div>`).join('')}</div>`).join('')}
     ${r.notes?`<p class="small muted">${esc(r.notes)}</p>`:''}
-    <div class="grid2"><button class="btn" data-act="aiDiscard">버리기</button><button class="btn pri" data-act="aiSave">${S.routines[id]?'기존 루틴 대신 저장':'이 루틴으로 저장'}</button></div></section>`}
+    <div class="grid2"><button class="btn" data-act="aiDiscard" data-req="${P0.req||''}">버리기</button><button class="btn pri" data-act="aiSave" data-req="${P0.req||''}" data-member="${id}">${S.routines[id]?'기존 루틴 대신 저장':'이 루틴으로 저장'}</button></div></section>`}
   return h}
 function aiNormalize(r,p){
   if(!r||!Array.isArray(r.days)||!r.days.length)throw new Error('형식 오류');
@@ -702,19 +780,15 @@ function aiNormalize(r,p){
   return{title:String(r.title||'AI 맞춤 루틴').slice(0,40),summary:String(r.summary||'').slice(0,400),notes:String(r.notes||'').slice(0,300),source:'ai',startDate:today(),ramp:(p.level||'초급')==='초급',days}}
 function fileToB64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(f)})}
 async function imageToJpeg(f){const url=URL.createObjectURL(f);try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
-  const s=Math.min(1,1800/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);
-  c.getContext('2d').drawImage(img,0,0,c.width,c.height);const d=c.toDataURL('image/jpeg',.85);return{type:'image/jpeg',data:d.split(',')[1],size:Math.round(d.length*.75)}}finally{URL.revokeObjectURL(url)}}
+  const s=Math.min(1,1100/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);const d=c.toDataURL('image/jpeg',.7);return{type:'image/jpeg',data:d.split(',')[1],size:Math.round(d.length*.75)}}finally{URL.revokeObjectURL(url)}}
 async function runAI(){const A=S.ai,id=S.view;const f=readProfForm();const prof=f?f.profile:P(id);
   if(f&&!(await act('gn_save_member',{p_id:id,p_name:f.name,p_color:f.color,p_profile:f.profile})))return;
   A.busy=true;A.err='';render();
-  const lib=Object.entries(EX).map(([k,e])=>`${k}|${e.n}|${e.p}|${e.eq}|${e.k}${e.per?'|한손':''}`).join('\n');
   const recent=logsOf(id).slice(0,5).map(l=>`${l.date} ${l.dayKey}: `+(l.entries||[]).map(en=>`${EX[en.ex]?.n||en.ex} ${en.sets.map(s=>fmtN(s.w)+'×'+s.r).join(',')}`).join(' / ')).join('; ');
-  try{const r=await fetch(`${SB_URL}/functions/v1/gn-ai-routine`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},
-      body:JSON.stringify({token:S.token,member:id,prompt:A.prompt,file:A.file?{name:A.file.name,type:A.file.type,data:A.file.data}:null,profile:prof,library:lib,recent})});
-    const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'AI 요청이 실패했어요.');
-    A.preview={member:id,rt:aiNormalize(j.routine,prof),extracted:j.routine.extracted||{}};A.applyProf=true}
-  catch(e){A.err=e.message==='Failed to fetch'?'인터넷 연결을 확인해주세요.':(e.message||'AI 요청이 실패했어요.')}
-  A.busy=false;render();setTimeout(()=>document.querySelector('.card.hero .lbl')?.scrollIntoView({behavior:'smooth',block:'start'}),50)}
+  const ok=await act('gn_ai_request',{p_member:id,p_prompt:A.prompt,p_profile:prof,p_recent:recent,p_file_type:A.file?.type||'',p_file_name:A.file?.name||'',p_file_b64:A.file?.data||''},'요청을 보냈어요. Claude가 만들면 여기에 나타나요');
+  if(ok){A.prompt='';A.file=null;document.querySelectorAll('[data-dirty]').forEach(e=>delete e.dataset.dirty)}
+  A.busy=false;render()}
 function vProfForm(m){const p=m.profile||{};const opt=(arr,v)=>arr.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
   return`<form class="prof" data-form="prof">
    <div class="fl"><label for="f_name">이름</label><input id="f_name" value="${esc(m.name||'')}" required></div>
@@ -768,10 +842,10 @@ async function onClick(ev){
    case'refresh':{a.classList.add('spin');const up=await checkUpdate(true);if(!up)await load();a.classList.remove('spin');return}
    case'doUpdate':if(S.session){toast('진행 중인 운동을 먼저 저장하거나 취소하세요');return}await hardReload(a.dataset.v);return;
    case'aiClearFile':S.ai.file=null;break;
-   case'aiDiscard':S.ai.preview=null;break;
-   case'aiSave':{const P0=S.ai.preview;if(!P0)break;const x=P0.extracted||{};
+   case'aiDiscard':if(a.dataset.req)await act('gn_ai_request_close',{p_id:a.dataset.req,p_status:'dismissed'});S.ai.preview=null;break;
+   case'aiSave':{let P0=S.ai.preview;if(!P0&&a.dataset.req){const r=(S.aiReqs||[]).find(x=>x.id===a.dataset.req);if(r)P0={member:r.member,req:r.id,rt:aiNormalize(r.result,P(r.member)),extracted:r.result.extracted||{}}}if(!P0)break;const x=P0.extracted||{};
      if(S.ai.applyProf&&(x.weight||x.bodyFat)){const m=M(P0.member);const pr={...(m.profile||{})};if(+x.weight)pr.weight=+x.weight;if(+x.bodyFat)pr.bodyFat=+x.bodyFat;if(!(await act('gn_save_member',{p_id:P0.member,p_name:m.name,p_color:m.color,p_profile:pr})))break}
-     document.querySelectorAll('[data-dirty]').forEach(e=>delete e.dataset.dirty);const rt={...P0.rt};if(await act('gn_save_routine',{p_member:P0.member,p_data:rt},'AI 루틴을 저장했어요')){S.ai.preview=null;S.ai.prompt='';S.ai.file=null;S.edit=null}break}
+     document.querySelectorAll('[data-dirty]').forEach(e=>delete e.dataset.dirty);const rt={...P0.rt};if(await act('gn_save_routine',{p_member:P0.member,p_data:rt},'AI 루틴을 저장했어요')){if(P0.req)await act('gn_ai_request_close',{p_id:P0.req,p_status:'applied'});S.ai.preview=null;S.ai.prompt='';S.ai.file=null;S.edit=null}break}
    case'retry':S.loadErr=null;render();await load();return;
    case'loginBack':S.login={step:1,code:'',list:null,busy:false,err:''};break;
    case'logout':if(S.confirm!=='logout'){S.confirm='logout';break}try{await api('gn_logout',{p_token:S.token})}catch(e){}logoutLocal();lsSet('gn_sess',null);S.session=null;break;
@@ -820,7 +894,7 @@ document.addEventListener('change',ev=>{const t=ev.target;if(t.type!=='file'&&t.
   else if(k==='ramp')S.edit.rt.ramp=t.checked;else if(k==='aiApplyProf')S.ai.applyProf=t.checked;else if(k==='statEx'){S.statEx=t.value;render()}
   else if(k==='dow'){const d=S.edit.rt.days[+t.dataset.d];if(t.value)d.dow=t.value;else delete d.dow}});
 document.addEventListener('change',async ev=>{const t=ev.target;if(t.id!=='aiFile'||!t.files||!t.files[0])return;const f=t.files[0];
-  try{if(f.type==='application/pdf'){if(f.size>10*1024*1024){toast('PDF는 10MB 이하만 올릴 수 있어요.');return}S.ai.file={name:f.name,type:f.type,size:f.size,data:await fileToB64(f)}}
+  try{if(f.type==='application/pdf'){if(f.size>2.8*1024*1024){toast('PDF는 2.8MB 이하만 올릴 수 있어요. 사진으로 찍어 올려도 돼요.');return}S.ai.file={name:f.name,type:f.type,size:f.size,data:await fileToB64(f)}}
     else if(f.type.startsWith('image/')||/\.(heic|heif)$/i.test(f.name)){const j=await imageToJpeg(f);S.ai.file={name:f.name,...j}}
     else{toast('사진 또는 PDF만 올릴 수 있어요.');return}}
   catch(e){toast('파일을 읽지 못했어요. 다른 사진으로 시도해주세요.');return}
