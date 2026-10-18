@@ -152,6 +152,8 @@ form.prof .full{grid-column:1/-1}
 .pics{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .pics figure{margin:0;display:flex;flex-direction:column;gap:4px}
 .pics img{width:100%;border-radius:8px;background:#fff;aspect-ratio:3/2;object-fit:contain}
+.video{position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;overflow:hidden;background:#000}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .pics figcaption{font-size:12px;color:var(--muted);text-align:center}
 ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
@@ -262,7 +264,6 @@ const EX={
  plank:{n:'플랭크',p:'코어',eq:'맨몸',inc:0,k:'time',r:[0,0],img:'Plank',c:['팔꿈치는 어깨 바로 아래','엉덩이가 처지거나 솟지 않게','배꼽을 당긴 상태로 호흡']},
  side_plank:{n:'사이드 플랭크',p:'코어',eq:'맨몸',inc:0,k:'time',r:[0,0],img:'Side Plank',c:['팔꿈치 어깨 아래','머리부터 발까지 일직선','양쪽 각각']},
  dead_bug:{n:'데드버그',p:'코어',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Dead Bug',c:['허리를 바닥에 붙인 채','반대 팔·다리를 천천히 뻗기','양쪽 번갈아 1회']},
- bird_dog:{n:'버드독',p:'코어',eq:'맨몸',inc:0,k:'bw',r:[0,0],noimg:1,img:'Bird Dog',c:['네발 자세','반대 팔·다리 뻗고 2초','골반이 돌아가지 않게']},
  pallof:{n:'팔로프 프레스',p:'코어',eq:'케이블',inc:2.5,k:'load',r:[.1,.09],alt:'dead_bug',img:'Pallof Press',c:['케이블 옆에 서서 손잡이를 가슴 앞에','몸이 돌아가지 않게 버티며 앞으로 밀기','2초 멈추고 돌아오기, 양쪽']},
  hanging_knee:{n:'행잉 니레이즈',p:'코어',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Hanging Knee Raise',imgNote:'사진은 다리를 편 레그레이즈. 초보는 무릎을 굽혀서.',c:['바에 매달려 반동 없이','무릎을 가슴 쪽으로','천천히 내리기']}
 };
@@ -303,6 +304,7 @@ const IMGID={"leg_press":"Leg_Press","goblet_squat":"Goblet_Squat","back_squat":
 const IMG_BASE='https://raw.githubusercontent.com/yuhonas/free-exercise-db/f00c92c7dcf1216a928a52c3706c7ce8e2f71ed5/exercises/';
 const imgSrc=(id,i)=>IMG_BASE+IMGID[id]+'/'+i+'.jpg';
 const hasImg=id=>EX[id]&&!EX[id].noimg&&!!IMGID[id];
+const YTV=/*YTV*/{};
 function ytLinks(id){const e=EX[id];const ko=e.n+' '+(['머신','케이블'].includes(e.eq)?'머신 사용법':'정확한 자세');const en=e.img+' proper form';
   return{ko:'https://www.youtube.com/results?search_query='+encodeURIComponent(ko),en:'https://www.youtube.com/results?search_query='+encodeURIComponent(en)}}
 
@@ -536,13 +538,13 @@ function vGuide(){
   const q=S.guideQ.trim();const list=Object.entries(EX).filter(([,e])=>(S.guidePart==='전체'||e.p===S.guidePart)&&(!q||e.n.includes(q)||e.eq.includes(q)));
   return`<h2>운동 가이드</h2><input class="search" id="guideQ" data-in="gq" placeholder="운동 이름 검색" value="${esc(S.guideQ)}">
   <div class="filters">${['전체',...PARTS].map(p=>`<button data-act="gpart" data-p="${p}" aria-pressed="${S.guidePart===p}">${p}</button>`).join('')}</div>
-  <div class="glist">${list.map(([id,e])=>`<button class="gitem" data-act="howto" data-ex="${id}">${hasImg(id)?`<img src="${imgSrc(id,0)}" alt="" loading="lazy">`:'<span class="noimg">이미지 없음</span>'}<div><b>${esc(e.n)}</b><span class="small muted">${e.p} · ${e.eq}</span></div></button>`).join('')||'<div class="empty">검색 결과가 없어요.</div>'}</div>
-  <p class="small muted">운동 사진: free-exercise-db (퍼블릭 도메인). 영상은 유튜브 검색 결과로 연결돼요.</p>`}
+  <div class="glist">${list.map(([id,e])=>`<button class="gitem" data-act="howto" data-ex="${id}">${hasImg(id)?`<img src="${imgSrc(id,0)}" alt="" loading="lazy">`:'<span class="noimg">이미지 없음</span>'}<div><b>${esc(e.n)}</b><span class="small muted">${e.p} · ${e.eq}${YTV[id]?' · ▶ 영상':''}</span></div></button>`).join('')||'<div class="empty">검색 결과가 없어요.</div>'}</div>
+  <p class="small muted">운동 사진: free-exercise-db (퍼블릭 도메인). 영상: 유튜브 각 채널.</p>`}
 function howtoSheet(id){const e=EX[id];const yt=ytLinks(id);
   return`<div class="row between"><div><div class="lbl">${e.p} · ${e.eq}</div><h2>${esc(e.n)}</h2></div><button class="btn sm" data-act="closeSheet">닫기</button></div>
    ${hasImg(id)?`<div class="pics"><figure><img src="${imgSrc(id,0)}" alt="${esc(e.n)} 시작 자세"><figcaption>시작</figcaption></figure><figure><img src="${imgSrc(id,1)}" alt="${esc(e.n)} 끝 자세"><figcaption>끝</figcaption></figure></div>${e.imgNote?`<p class="small muted">${esc(e.imgNote)}</p>`:''}`:''}
    <ol class="cues">${e.c.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>${e.w?`<div class="pill warn" style="white-space:normal;border-radius:8px;padding:6px 10px">${esc(e.w)}</div>`:''}
-   <div class="grid2"><a class="btn pri" href="${yt.ko}" target="_blank" rel="noopener">▶ 한국어 영상</a><a class="btn" href="${yt.en}" target="_blank" rel="noopener">▶ 영어 영상</a></div>
+   ${YTV[id]?`<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${YTV[id].id}?playsinline=1&rel=0" title="${esc(e.n)} 영상" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy"></iframe></div><p class="small muted">▶ ${esc(YTV[id].title)} · ${esc(YTV[id].channel)}</p><div class="grid2"><a class="btn pri" href="https://www.youtube.com/watch?v=${YTV[id].id}" target="_blank" rel="noopener">유튜브 앱에서 보기</a><a class="btn" href="${yt.ko}" target="_blank" rel="noopener">다른 영상 찾기</a></div>`:`<div class="grid2"><a class="btn pri" href="${yt.ko}" target="_blank" rel="noopener">▶ 한국어 영상</a><a class="btn" href="${yt.en}" target="_blank" rel="noopener">▶ 영어 영상</a></div>`}
    <p class="small muted">기록 단위: ${unitOf(id)}${e.inc?` · 증량 단위 ${fmtN(e.inc)}kg`:''}</p>`}
 function renderSheet(){const s=S.sheet;if(!s){$('#sheetSlot').innerHTML='';document.body.style.overflow='';return}
   $('#sheetSlot').innerHTML=`<div class="sheet" data-act="closeSheetBg"><div class="panel" role="dialog" aria-modal="true">${s.type==='howto'?howtoSheet(s.ex):''}</div></div>`;document.body.style.overflow='hidden'}
