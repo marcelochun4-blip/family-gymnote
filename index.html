@@ -363,7 +363,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.18-2305';
+const APP_VER='2026.10.18-2345';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -616,7 +616,7 @@ function prsOf(id,sinceTs){const out=[];logsOf(id).filter(l=>l.ts>=sinceTs).forE
 const FREEZE_EVERY=5,FREEZE_MAX=2;
 function streakOf(id){
   const dates=new Set(logsOf(id).map(l=>String(l.date).slice(0,10)));const t=targetDays(id);const maxRest=t<=2?3:2;
-  const td=today();const res={streak:0,best:0,freezes:0,days:{},todayDone:dates.has(td),todayState:'none',restLeft:0,nextFreezeIn:FREEZE_EVERY,total:0};
+  const td=today();const res={streak:0,best:0,freezes:0,days:{},todayDone:dates.has(td),todayState:'start',restLeft:0,nextFreezeIn:FREEZE_EVERY,total:0};
   if(!dates.size)return res;
   const first=[...dates].sort()[0];let d=parseD(first),streak=0,best=0,freezes=0,workouts=0,restRun=0;
   while(dstr(d)<=td){const s=dstr(d);
