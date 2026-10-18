@@ -267,7 +267,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.18-2113';
+const APP_VER='2026.10.18-2222';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -401,7 +401,8 @@ async function load(silent){
     const mem={};st.members.forEach(m=>mem[m.id]=m);S.members=mem;S.routines=st.routines||{};
     S.logs=(st.logs||[]).map(l=>({...(l.data||{}),id:l.id,member:l.member,date:l.date,ts:l.ts}));S.cheers=st.cheers||[];
     S.me=st.me;lsSet('gn_me',S.me);if(!S.view||!mem[S.view])S.view=S.me;S.loaded=true;
-    if(!(silent&&S.tab==='work'&&S.session))render()}
+    const busyForm=document.querySelector('#main [data-dirty]')||document.querySelector('#main form.prof')||S.edit||S.openMsg;
+    if(!(silent&&((S.tab==='work'&&S.session)||busyForm)))render()}
   catch(e){if(!silent||e.auth)toast(e.msg);if(e.auth||!S.loaded){S.loadErr=e.msg;render()}}}
 async function act(fn,body,okMsg){if(S.busy){toast('처리 중이에요. 잠시만요.');return false}S.busy=true;try{const r=await api(fn,{p_token:S.token,...body});if(okMsg)toast(okMsg);await load(true);return r??true}catch(e){toast(e.msg);return false}finally{S.busy=false}}
 function logoutLocal(){S.token=null;lsSet('gn_token',null);S.loaded=false;S.login={step:1,code:'',list:null,busy:false,err:''}}
@@ -481,7 +482,9 @@ function render(){
   const un=unseenCheers().length;
   $('#tabs').innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-tab="${k}" ${S.tab===k?'aria-current="page"':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${ICON[k]}</svg>${l}${k==='home'&&un?`<span class="dot">${un}</span>`:''}</button>`).join('');
   const ae=document.activeElement;const keep=ae&&ae.id&&main.contains(ae)?{id:ae.id,s:ae.selectionStart,e:ae.selectionEnd}:null;
+  const dirty={};main.querySelectorAll('[data-dirty]').forEach(el=>{if(el.id)dirty[el.id]=el.type==='checkbox'?el.checked:el.value});
   main.innerHTML=({home:vHome,work:vWork,fam:vFam,guide:vGuide,me:vMe}[S.tab]||vHome)();
+  Object.entries(dirty).forEach(([id,v])=>{const el=document.getElementById(id);if(el){if(el.type==='checkbox')el.checked=v;else el.value=v;el.dataset.dirty='1'}});
   if(keep){const el=document.getElementById(keep.id);if(el){el.focus({preventScroll:true});try{if(keep.s!=null)el.setSelectionRange(keep.s,keep.e)}catch(e){}}}
   renderTimer();renderSheet()}
 
@@ -765,12 +768,12 @@ async function onClick(ev){
      S.edit.rt.days[di].items.push({ex:id,sets:g.sets,min:e.k==='time'?20:g.min,max:e.k==='time'?30:g.max,weight:estStart(id,p),rest:g.rest,est:true});break}
   }
   render()}
-document.addEventListener('change',ev=>{const t=ev.target;const k=t.dataset.chk;if(!k)return;
+document.addEventListener('change',ev=>{const t=ev.target;if(t.closest&&t.closest('form'))t.dataset.dirty='1';const k=t.dataset.chk;if(!k)return;
   if(k==='warm'){S.session.warm=t.checked;saveDraft()}else if(k==='fin'){S.session.fin=t.checked;saveDraft()}
   else if(k==='ramp')S.edit.rt.ramp=t.checked;else if(k==='statEx'){S.statEx=t.value;render()}
   else if(k==='dow'){const d=S.edit.rt.days[+t.dataset.d];if(t.value)d.dow=t.value;else delete d.dow}});
 let draftT;
-document.addEventListener('input',ev=>{const t=ev.target;
+document.addEventListener('input',ev=>{const t=ev.target;if(t.closest&&t.closest('form'))t.dataset.dirty='1';
   if(t.dataset.in==='w'||t.dataset.in==='r'){S.session.entries[+t.dataset.e].sets[+t.dataset.s][t.dataset.in]=t.value.replace(/[^\d.]/g,'');clearTimeout(draftT);draftT=setTimeout(saveDraft,400)}
   else if(t.dataset.in==='note'){S.session.note=t.value;clearTimeout(draftT);draftT=setTimeout(saveDraft,400)}
   else if(t.dataset.in==='gq'){S.guideQ=t.value;render()}
