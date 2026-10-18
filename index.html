@@ -16,7 +16,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="https://marcelochun4-blip.github.io/family-gymnote/icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&family=Gaegu:wght@400;700&family=Orbitron:wght@700;900&display=swap">
 <style>
 /* 레이아웃: 폰 우선 단일 컬럼(최대 600px), 상단 고정 헤더, 하단 탭바. 구성원마다 원판 색으로 앱이 물듦 */
 :root{
@@ -56,6 +57,42 @@
   --btn-pri:#ff4a1c; --page-bg:repeating-linear-gradient(135deg,#ffffff05 0 2px,transparent 2px 14px);
   --top-bg:#0a0b0de6; --f-display:"Black Han Sans","Pretendard Variable",sans-serif; --dw:400;
   --r:6px; --rb:4px; --shadow:none; --bw:2px; color-scheme:dark}
+/* 네온 사이버: 검정 + 시안·마젠타 발광, 원근 그리드 */
+:root[data-skin="neon"]{
+  --bg:#06060c; --surface:#0d0d1a; --sunk:#16162a; --ink:#e8fbff; --muted:#8ea6c8; --line:#25254a;
+  --me:#00f0ff; --me-ink:#00121a; --acc2:#ff2bd6; --good:#39ff9f; --warn:#ffe14d; --bad:#ff3d71;
+  --btn-pri:linear-gradient(90deg,#00f0ff,#ff2bd6);
+  --page-bg:linear-gradient(#06060c 55%,transparent),repeating-linear-gradient(90deg,#00f0ff14 0 1px,transparent 1px 44px),repeating-linear-gradient(0deg,#ff2bd614 0 1px,transparent 1px 44px);
+  --top-bg:#06060ce6; --f-display:"Orbitron","Pretendard Variable",sans-serif; --dw:900;
+  --r:10px; --rb:8px; --shadow:0 0 0 1px #00f0ff22,0 0 18px #00f0ff14; color-scheme:dark}
+/* 8비트 레트로: 픽셀 글꼴, 각진 테두리, 그림자 블록 */
+:root[data-skin="pixel"]{
+  --bg:#1d2045; --surface:#2a2f63; --sunk:#353b78; --ink:#f7f7f7; --muted:#b9bde8; --line:#0b0d22;
+  --me:#ffcd3c; --me-ink:#1d1300; --acc2:#ff5c5c; --good:#59f08a; --warn:#ffcd3c; --bad:#ff5c5c;
+  --btn-pri:#ffcd3c; --page-bg:repeating-conic-gradient(#ffffff06 0 25%,transparent 0 50%) 0 0/16px 16px;
+  --top-bg:#1d2045; --f-body:"Galmuri11","Pretendard Variable",monospace; --f-display:"Galmuri14","Galmuri11",monospace; --f-num:"Galmuri11",monospace; --dw:400;
+  --r:0px; --rb:0px; --shadow:4px 4px 0 #0b0d22; --bw:3px; color-scheme:dark}
+/* 오로라 글래스: 흐르는 오로라 배경 + 반투명 유리 카드 */
+:root[data-skin="aurora"]{
+  --bg:#0b1026; --surface:#ffffff14; --sunk:#ffffff12; --ink:#f3f8ff; --muted:#c3cdee; --line:#ffffff26;
+  --me:#7cf5c4; --me-ink:#04221a; --acc2:#b38cff; --good:#7cf5c4; --warn:#ffd27a; --bad:#ff8aa6;
+  --btn-pri:linear-gradient(120deg,#7cf5c4,#6fb8ff 50%,#b38cff);
+  --page-bg:radial-gradient(60% 50% at 20% 10%,#2dd4bf66,transparent 70%),radial-gradient(55% 45% at 85% 25%,#8b5cf666,transparent 70%),radial-gradient(60% 50% at 50% 100%,#3b82f655,transparent 70%);
+  --top-bg:#0b1026b3; --r:22px; --rb:16px; --shadow:0 8px 32px #00000040; color-scheme:dark}
+/* 농구 코트: 원목 마루 + 코트 라인 */
+:root[data-skin="court"]{
+  --bg:#c98b4e; --surface:#fff8ef; --sunk:#f5e6d3; --ink:#2b1a0e; --muted:#7a5a3e; --line:#e7cfb3;
+  --me:#ff6b00; --me-ink:#ffffff; --acc2:#1d3557; --good:#2a9d58; --warn:#c77d00; --bad:#d62828;
+  --btn-pri:#ff6b00; --page-bg:repeating-linear-gradient(90deg,#00000012 0 2px,transparent 2px 64px),repeating-linear-gradient(0deg,#ffffff0d 0 1px,transparent 1px 9px),linear-gradient(90deg,#b8783d,#d39a5d 50%,#b8783d);
+  --top-bg:#c98b4ef2; --f-display:"Black Han Sans","Pretendard Variable",sans-serif; --dw:400;
+  --r:12px; --rb:999px; --shadow:0 3px 0 #00000026; --bw:2px; color-scheme:light}
+/* 손글씨 노트: 줄공책 + 빨간 여백선 + 볼펜 글씨 */
+:root[data-skin="note"]{
+  --bg:#fbf8f1; --surface:#fffdf8; --sunk:#f1ece0; --ink:#1f2b45; --muted:#5a6680; --line:#d9d2c2;
+  --me:#2b59c3; --me-ink:#ffffff; --acc2:#e63946; --good:#2a8a52; --warn:#c77d00; --bad:#e63946;
+  --btn-pri:#2b59c3; --page-bg:linear-gradient(90deg,transparent 30px,#e6394655 30px 32px,transparent 32px),repeating-linear-gradient(0deg,#9fb6e033 0 1px,transparent 1px 32px);
+  --top-bg:#fbf8f1f2; --f-body:"Gaegu","Pretendard Variable",sans-serif; --f-display:"Gaegu","Pretendard Variable",sans-serif; --f-num:"Gaegu","Pretendard Variable",sans-serif; --dw:700;
+  --r:4px; --rb:6px; --shadow:2px 3px 0 #1f2b4514; --bw:1.5px; color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
 html,body{background-image:var(--page-bg);background-attachment:fixed}
@@ -279,6 +316,35 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 .skin[aria-pressed="true"]{border-color:var(--me);box-shadow:0 0 0 2px var(--me)}
 .skin .sw{height:54px;border-radius:10px;display:flex;align-items:flex-end;justify-content:space-between;padding:8px 10px;font-weight:800;font-size:15px}
 .skin .sw i{width:18px;height:18px;border-radius:50%;display:block}
+/* 신규 테마 디테일 */
+:root[data-skin="neon"] .brand h1,:root[data-skin="neon"] .hero h2{color:#e8fbff;text-shadow:0 0 6px #00f0ff,0 0 18px #00f0ffaa,0 0 32px #ff2bd666;letter-spacing:.04em}
+:root[data-skin="neon"] .card.hero{border-color:#00f0ff;box-shadow:0 0 0 1px #00f0ff,0 0 24px #00f0ff55,inset 0 0 24px #ff2bd622}
+:root[data-skin="neon"] .btn.pri{box-shadow:0 0 16px #00f0ff88;text-shadow:none}
+:root[data-skin="neon"] .num{text-shadow:0 0 8px currentColor}
+:root[data-skin="neon"] .meter i{box-shadow:0 0 8px var(--c,var(--me))}
+:root[data-skin="neon"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;background:repeating-linear-gradient(0deg,#ffffff06 0 1px,transparent 1px 3px)}
+:root[data-skin="pixel"] body{font-size:15px;letter-spacing:0}
+:root[data-skin="pixel"] .card,:root[data-skin="pixel"] .btn,:root[data-skin="pixel"] .chip,:root[data-skin="pixel"] .who,:root[data-skin="pixel"] .iconbtn,:root[data-skin="pixel"] .field,:root[data-skin="pixel"] .check,:root[data-skin="pixel"] .pill,:root[data-skin="pixel"] .seg,:root[data-skin="pixel"] .seg button,:root[data-skin="pixel"] .plate,:root[data-skin="pixel"] .meter,:root[data-skin="pixel"] .meter i,:root[data-skin="pixel"] .ex,:root[data-skin="pixel"] .post,:root[data-skin="pixel"] .gitem,:root[data-skin="pixel"] .flame,:root[data-skin="pixel"] .sday i{border-radius:0!important}
+:root[data-skin="pixel"] .btn.pri{box-shadow:4px 4px 0 #0b0d22;border:3px solid #0b0d22}
+:root[data-skin="pixel"] .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #0b0d22}
+:root[data-skin="pixel"] .brand h1::before{content:"▶ ";color:var(--me)}
+:root[data-skin="pixel"] img{image-rendering:pixelated}
+:root[data-skin="aurora"] html,:root[data-skin="aurora"] body{background-size:200% 200%;animation:aur 18s ease-in-out infinite alternate}
+@keyframes aur{0%{background-position:0% 0%}100%{background-position:100% 60%}}
+:root[data-skin="aurora"] .card,:root[data-skin="aurora"] .post,:root[data-skin="aurora"] .ex,:root[data-skin="aurora"] .tabbar,:root[data-skin="aurora"] .gitem{-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%)}
+:root[data-skin="aurora"] .tabbar{background:#0b1026a6}
+:root[data-skin="aurora"] .brand h1{background:linear-gradient(90deg,#7cf5c4,#6fb8ff,#b38cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="court"] .card.hero{background:radial-gradient(circle at 100% 0%,transparent 70px,#ffffff 71px 73px,transparent 74px),var(--surface);border:2px solid #ffffff;box-shadow:0 0 0 2px #ff6b00,0 4px 0 #00000026}
+:root[data-skin="court"] .brand h1{color:#fff8ef;text-shadow:0 2px 0 #7a3d00}
+:root[data-skin="court"] .brand h1::before{content:"🏀 "}
+:root[data-skin="court"] .tabbar{background:#1d3557;border-top:3px solid #ff6b00}
+:root[data-skin="court"] .tabbar button{color:#a9bcd8}:root[data-skin="court"] .tabbar button[aria-current="page"]{color:#fff}
+:root[data-skin="note"] body{font-size:19px;line-height:1.5}
+:root[data-skin="note"] .small{font-size:16px}:root[data-skin="note"] .lbl{font-size:14px}
+:root[data-skin="note"] .card{transform:rotate(-.25deg)}:root[data-skin="note"] .card:nth-child(even){transform:rotate(.3deg)}
+:root[data-skin="note"] .card.hero{background:#fff9c4;border-color:#efe08a;box-shadow:3px 4px 0 #1f2b451a}
+:root[data-skin="note"] .brand h1{text-decoration:underline wavy #e63946;text-underline-offset:6px}
+:root[data-skin="note"] .btn.pri{box-shadow:2px 2px 0 #1f2b45}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -297,7 +363,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.18-2244';
+const APP_VER='2026.10.18-2305';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -348,10 +414,44 @@ const EX={
  side_plank:{n:'사이드 플랭크',p:'코어',eq:'맨몸',inc:0,k:'time',r:[0,0],img:'Side Plank',c:['팔꿈치 어깨 아래','머리부터 발까지 일직선','양쪽 각각']},
  dead_bug:{n:'데드버그',p:'코어',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Dead Bug',c:['허리를 바닥에 붙인 채','반대 팔·다리를 천천히 뻗기','양쪽 번갈아 1회']},
  pallof:{n:'팔로프 프레스',p:'코어',eq:'케이블',inc:2.5,k:'load',r:[.1,.09],alt:'dead_bug',img:'Pallof Press',c:['케이블 옆에 서서 손잡이를 가슴 앞에','몸이 돌아가지 않게 버티며 앞으로 밀기','2초 멈추고 돌아오기, 양쪽']},
- hanging_knee:{n:'행잉 니레이즈',p:'코어',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Hanging Knee Raise',imgNote:'사진은 다리를 편 레그레이즈. 초보는 무릎을 굽혀서.',c:['바에 매달려 반동 없이','무릎을 가슴 쪽으로','천천히 내리기']}
+ hanging_knee:{n:'행잉 니레이즈',p:'코어',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Hanging Knee Raise',imgNote:'사진은 다리를 편 레그레이즈. 초보는 무릎을 굽혀서.',c:['바에 매달려 반동 없이','무릎을 가슴 쪽으로','천천히 내리기']},
+ ankle_abc:{n:'발목 알파벳',p:'재활',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Ankle Circles',rehab:1,c:['의자에 앉아 다친 발을 띄우기','엄지발가락으로 허공에 ㄱ~ㅎ 또는 A~Z 쓰기','무릎·다리는 고정, 발목만 움직이기'],w:'급성기(붓기·열감)에는 통증 없는 범위에서만.'},
+ band_ev:{n:'밴드 발목 외번',p:'재활',eq:'밴드',inc:0,k:'bw',r:[0,0],noimg:1,img:'resistance band ankle eversion',rehab:1,c:['앉아서 밴드를 발 바깥쪽에 걸고 반대편 고정','뒤꿈치는 바닥에 대고 발을 바깥쪽으로 밀기','천천히 3초 돌아오기'],w:'발목 외측 인대(ATFL) 재활의 핵심. 통증 2/10 이하로.'},
+ band_inv:{n:'밴드 발목 내번',p:'재활',eq:'밴드',inc:0,k:'bw',r:[0,0],noimg:1,img:'resistance band ankle inversion',rehab:1,c:['밴드를 발 안쪽에 걸고 바깥쪽에서 고정','발을 안쪽으로 당기기','천천히 돌아오기']},
+ band_df:{n:'밴드 발등 당기기',p:'재활',eq:'밴드',inc:0,k:'bw',r:[0,0],noimg:1,img:'resistance band ankle dorsiflexion',rehab:1,c:['다리를 펴고 앉아 밴드를 발등에 걸고 앞쪽 고정','발끝을 몸 쪽으로 당기기','2초 멈추고 천천히']},
+ sl_balance:{n:'한발 서기',p:'재활',eq:'맨몸',inc:0,k:'time',r:[0,0],noimg:1,img:'single leg balance',rehab:1,c:['벽이나 의자 옆에서 다친 발로 서기','무릎 살짝 굽히고 골반 수평','쉬우면 눈 감기, 팔 움직이기로 난이도 올리기']},
+ sl_balance_foam:{n:'쿠션 위 한발 서기',p:'재활',eq:'맨몸',inc:0,k:'time',r:[0,0],img:'Balance Board',imgNote:'사진은 밸런스 보드. 쿠션·보수·접은 수건도 같아요.',rehab:1,c:['쿠션·보수·밸런스패드 위에서 한발 서기','발목이 흔들려도 무릎·골반으로 버티기','30초 쉽게 되면 공 주고받기 추가']},
+ heel_raise_ecc:{n:'편심 카프레이즈',p:'재활',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Standing Calf Raises',imgNote:'사진은 기본 카프레이즈. 양발로 올라가고 다친 발 하나로 3초간 내려와요.',rehab:1,c:['양발로 뒤꿈치 들어 올리기','다친 발 하나로만 3초 동안 천천히 내리기','발목이 바깥으로 꺾이지 않게 엄지발가락 쪽에 체중']},
+ sl_calf:{n:'한발 카프레이즈',p:'재활',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Standing Calf Raises',imgNote:'사진은 양발 버전. 한 발로 해요.',rehab:1,c:['벽 짚고 한 발로 서기','끝까지 올라가 1초 멈추기','양쪽 회수 차이를 기록해서 비교']},
+ towel_scrunch:{n:'수건 발가락 당기기',p:'재활',eq:'맨몸',inc:0,k:'bw',r:[0,0],noimg:1,img:'towel scrunch',rehab:1,c:['앉아서 바닥에 수건 펴기','발가락으로 수건을 움켜 끌어오기','발바닥 아치 근육 강화']},
+ star_excursion:{n:'스타 익스커션 (Y 밸런스)',p:'재활',eq:'맨몸',inc:0,k:'bw',r:[0,0],noimg:1,img:'star excursion balance',rehab:1,c:['다친 발로 서고 반대 발로 앞·옆·뒤 방향 바닥 찍기','서 있는 무릎은 발끝 방향','멀리 찍을수록 어려움, 회수는 방향 3개가 1회']},
+ sl_hop:{n:'한발 제자리 홉',p:'재활',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Single-Leg Hop Progression',rehab:1,c:['한발로 작게 제자리 뛰기','착지는 앞꿈치로 부드럽게','통증 없이 한발 카프레이즈 20회가 될 때 시작'],w:'재활 후기 단계. 붓기·통증이 남아 있으면 하지 마세요.'},
+ lat_hop:{n:'좌우 라인 홉',p:'재활',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Lateral Cone Hops',rehab:1,c:['바닥 선을 두고 양발로 좌우 뛰기','익숙해지면 한발로','착지 때 발목이 바깥으로 꺾이지 않게'],w:'재활 후기 단계, 코트 복귀 전 점검용.'},
+ box_jump:{n:'박스 점프',p:'운동능력',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Front Box Jump',pw:1,c:['무릎 높이 이하 박스부터','팔을 크게 휘둘러 뛰어오르기','박스 위에 조용히 착지, 내려올 땐 걸어서'],w:'높이 욕심 금지. 착지가 소리 나면 낮추세요.'},
+ broad_jump:{n:'제자리 멀리뛰기',p:'운동능력',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Standing Long Jump',pw:1,c:['엉덩이를 뒤로 빼며 반동','팔과 함께 앞으로 폭발적으로','무릎 굽혀 2초 버티며 착지']},
+ jump_squat:{n:'점프 스쿼트',p:'운동능력',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Freehand Jump Squat',pw:1,c:['하프 스쿼트 깊이에서 최대한 높이','착지하면서 바로 다음 점프','무릎이 안으로 모이지 않게']},
+ depth_jump:{n:'뎁스 점프',p:'운동능력',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Linear Depth Jump',pw:1,adv:1,c:['낮은 박스에서 걸어 내려오기','발이 닿자마자 최대한 높이 점프','지면 접촉 시간을 최대한 짧게'],w:'상급자용. 점프 기본기가 된 뒤에.'},
+ lat_bound:{n:'레터럴 바운드',p:'운동능력',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Lateral Bound',pw:1,c:['한발로 옆으로 멀리 점프','반대 발로 착지해 1초 버티기','농구 수비·배구 이동 방향 전환에 필요']},
+ pogo:{n:'포고 점프',p:'운동능력',eq:'맨몸',inc:0,k:'bw',reps:[15,25],r:[0,0],img:'Hurdle Hops',imgNote:'사진은 허들 홉. 포고는 제자리에서 무릎을 거의 안 굽히고 발목으로만 튀어요.',pw:1,c:['무릎은 거의 펴고 발목 탄성으로만 통통','앞꿈치 착지, 뒤꿈치 바닥에 안 닿게','리듬 일정하게 20~30회']},
+ approach_jump:{n:'어프로치 점프',p:'운동능력',eq:'맨몸',inc:0,k:'bw',r:[0,0],noimg:1,img:'volleyball approach jump',pw:1,c:['2~3스텝 도움닫기 후 양발 점프','마지막 스텝을 크게, 팔을 뒤에서 앞으로 크게','배구 스파이크·농구 리바운드 점프 연습']},
+ mb_slam:{n:'메디신볼 슬램',p:'운동능력',eq:'메디신볼',inc:1,k:'load',r:[.06,.04],img:'Overhead Slam',pw:1,c:['공을 머리 위로 크게 들기','복근으로 바닥에 강하게 내리꽂기','튀어 오르는 공 주의']},
+ mb_chest:{n:'메디신볼 체스트 패스',p:'운동능력',eq:'메디신볼',inc:1,k:'load',r:[.05,.03],img:'Medicine Ball Chest Pass',pw:1,c:['벽 앞에서 가슴 앞에 공 잡기','한 발 내딛으며 빠르게 밀어 던지기','농구 패스·배구 토스 파워']},
+ mb_scoop:{n:'메디신볼 스쿱 스로',p:'운동능력',eq:'메디신볼',inc:1,k:'load',r:[.06,.04],img:'Medicine Ball Scoop Throw',pw:1,c:['스쿼트 자세에서 공을 다리 사이로','엉덩이를 펴며 앞·위로 던지기','점프 동작의 힘 전달 연습']},
+ plyo_pushup:{n:'플라이오 푸시업',p:'운동능력',eq:'맨몸',inc:0,k:'bw',r:[0,0],img:'Plyo Push-up',pw:1,adv:1,c:['푸시업 내려갔다가 폭발적으로 밀어 손 떼기','부드럽게 착지','초보는 벤치 짚고 인클라인으로']},
+ kb_swing:{n:'케틀벨 스윙',p:'운동능력',eq:'케틀벨',inc:2,k:'load',r:[.2,.12],img:'One-Arm Kettlebell Swings',imgNote:'사진은 한 손 버전. 처음엔 두 손으로.',c:['엉덩이를 뒤로 접었다 강하게 펴기','팔이 아니라 엉덩이 힘으로 가슴 높이까지','허리는 끝까지 곧게']},
+ trap_dl:{n:'트랩바 데드리프트',p:'운동능력',eq:'바벨',inc:5,k:'load',r:[.8,.5],img:'Trap Bar Deadlift',c:['바 가운데 서서 손잡이 잡기','가슴 들고 바닥을 밀어내듯 일어나기','점프 파워의 기초 근력'],w:'트랩바 무게 포함(보통 20~25kg)으로 기록.'},
+ sl_rdl:{n:'싱글레그 RDL',p:'운동능력',eq:'덤벨',inc:1,k:'load',per:1,r:[.1,.05],img:'Kettlebell One-Legged Deadlift',c:['한발로 서서 상체 숙이며 뒷다리 뒤로','골반이 돌아가지 않게 수평','햄스트링·발목 안정성 동시 강화']},
+ nordic:{n:'노르딕 햄스트링 컬',p:'운동능력',eq:'맨몸',inc:0,k:'bw',reps:[3,6],r:[0,0],img:'Natural Glute Ham Raise',c:['무릎 꿇고 발목을 파트너나 기구에 고정','몸을 일직선으로 천천히 앞으로 버티며 내려가기','손으로 받고 밀어서 복귀'],w:'햄스트링 부상 예방 효과가 큼. 처음엔 3~5회.'},
+ copenhagen:{n:'코펜하겐 플랭크',p:'운동능력',eq:'맨몸',inc:0,k:'time',r:[0,0],noimg:1,img:'copenhagen plank',c:['옆으로 누워 위쪽 다리를 벤치에 올리기','아래 다리는 들고 사이드 플랭크','초보는 무릎을 벤치에']},
+ defense_slide:{n:'수비 슬라이드',p:'운동능력',eq:'맨몸',inc:0,k:'time',r:[0,0],noimg:1,img:'basketball defensive slide',c:['낮은 자세, 발은 어깨보다 넓게','발이 붙거나 교차하지 않게 옆으로','5m 왕복 반복']},
+ pro_agility:{n:'5-10-5 셔틀',p:'운동능력',eq:'맨몸',inc:0,k:'bw',reps:[4,6],r:[0,0],img:'Single-Cone Sprint Drill',imgNote:'사진은 콘 스프린트 드릴. 5야드-10야드-5야드로 방향 전환해요.',c:['가운데서 출발해 5m 오른쪽','10m 왼쪽 끝까지','다시 5m 돌아오기, 방향 전환 때 낮게'],w:'발목 재활 중이면 하지 마세요.'},
+ sprint_10:{n:'10m 스프린트',p:'운동능력',eq:'맨몸',inc:0,k:'bw',reps:[4,6],r:[0,0],img:'Wind Sprints',c:['상체를 앞으로 기울여 출발','첫 3걸음 짧고 강하게','전력 후 걸어서 완전 회복']},
+ scaption:{n:'스캡션',p:'어깨',eq:'덤벨',inc:.5,k:'load',per:1,r:[.04,.025],img:'Dumbbell Scaption',c:['엄지 위로, 몸 앞 30도 방향','어깨 높이까지만 들기','배구 스파이크·서브 어깨 보호']},
+ band_pullapart:{n:'밴드 풀 어파트',p:'어깨',eq:'밴드',inc:0,k:'bw',r:[0,0],img:'Band Pull Apart',c:['어깨 너비로 밴드 잡고 팔 앞으로','날개뼈 모으며 옆으로 벌리기','천천히 돌아오기']}
 };
 const PARTS=['하체','가슴','등','어깨','팔','코어'];
-const GOALS={'근력':{sets:4,min:5,max:8,rest:120},'근비대':{sets:3,min:8,max:12,rest:90},'체지방 감량':{sets:3,min:12,max:15,rest:60},'균형·체력':{sets:3,min:10,max:15,rest:75}};
+const GUIDE_PARTS=[...PARTS,'재활','운동능력'];
+const GOALS={'근력':{sets:4,min:5,max:8,rest:120},'근비대':{sets:3,min:8,max:12,rest:90},'체지방 감량':{sets:3,min:12,max:15,rest:60},'균형·체력':{sets:3,min:10,max:15,rest:75},'운동능력(농구·배구)':{sets:3,min:6,max:8,rest:120,ath:1}};
 const LEVELF={'초급':1,'중급':1.5,'상급':2};
 const TPL={
  2:[['A','전신 A',['leg_press','chest_press','lat_pull','db_rdl','plank','lat_raise','leg_curl']],['B','전신 B',['goblet_squat','seated_row','shoulder_press_m','hip_thrust','dead_bug','pushdown','calf_raise']]],
@@ -359,6 +459,13 @@ const TPL={
  4:[['A','상체 A',['bench','lat_pull','shoulder_press_m','seated_row','lat_raise','pushdown','db_curl']],['B','하체 A',['back_squat','leg_curl','hip_thrust','calf_raise','plank','leg_ext']],['C','상체 B',['incline_db','assist_pullup','db_ohp','face_pull','pec_deck','db_curl']],['D','하체 B',['db_rdl','bss','leg_press','hip_abd','side_plank','calf_raise']]],
  5:[['A','밀기',['bench','incline_db','shoulder_press_m','lat_raise','pushdown','pec_deck']],['B','당기기',['lat_pull','seated_row','db_row','face_pull','db_curl','back_ext']],['C','하체',['back_squat','db_rdl','leg_ext','leg_curl','calf_raise','plank']],['D','상체',['incline_db','assist_pullup','db_ohp','seated_row','lat_raise','db_curl']],['E','하체 · 둔근',['leg_press','hip_thrust','bss','hip_abd','dead_bug','calf_raise']]]
 };
+const TPL_ATH={
+ 2:[['A','파워 · 하체',['box_jump','broad_jump','trap_dl','sl_rdl','nordic','pogo','copenhagen']],['B','상체 · 민첩',['mb_chest','db_bench','db_row','lat_bound','pro_agility','scaption','pallof']]],
+ 3:[['A','점프 · 하체 근력',['box_jump','broad_jump','trap_dl','sl_rdl','nordic','pogo','copenhagen']],['B','상체 파워 · 어깨 건강',['mb_chest','plyo_pushup','db_bench','db_row','scaption','band_pullapart','pallof']],['C','민첩 · 방향 전환',['lat_bound','pro_agility','defense_slide','bss','hip_thrust','sl_calf','dead_bug']]],
+ 4:[['A','점프 · 하체 근력',['box_jump','broad_jump','trap_dl','sl_rdl','nordic','pogo','copenhagen']],['B','상체 파워',['mb_chest','plyo_pushup','db_bench','db_row','scaption','band_pullapart']],['C','민첩 · 방향 전환',['lat_bound','pro_agility','defense_slide','bss','hip_thrust','sl_calf','dead_bug']],['D','근력 기본기',['goblet_squat','lat_pull','incline_db','db_rdl','face_pull','side_plank']]],
+ 5:[['A','점프 · 하체 근력',['box_jump','broad_jump','trap_dl','sl_rdl','nordic','pogo','copenhagen']],['B','상체 파워',['mb_chest','plyo_pushup','db_bench','db_row','scaption','band_pullapart']],['C','민첩 · 방향 전환',['lat_bound','pro_agility','defense_slide','bss','hip_thrust','sl_calf','dead_bug']],['D','근력 기본기',['goblet_squat','lat_pull','incline_db','db_rdl','face_pull','side_plank']],['E','스피드 · 전신 파워',['approach_jump','sprint_10','kb_swing','mb_scoop','mb_slam','depth_jump','hanging_knee']]]
+};
+const REHAB={발목:['ankle_abc','band_ev','sl_balance','heel_raise_ecc','band_inv','sl_balance_foam']};
 const PLATES=['red','yellow','blue','green','violet','slate'];
 const DOW=['일','월','화','수','목','금','토'];
 const REACTS=['👏','💪','🔥','❤️'];
@@ -366,8 +473,13 @@ const SKINS=[
  {id:'clean',name:'클린',desc:'깔끔한 기본, 내 색상',bg:'linear-gradient(135deg,#f4f5f3,#ffffff)',fg:'#16191b',dots:['#d6403a','#2f6bd0']},
  {id:'bling',name:'블링블링',desc:'밤하늘 + 골드 홀로그램',bg:'linear-gradient(135deg,#120d22,#2a2149)',fg:'#f7c948',dots:['#ff7ad9','#8fd8ff']},
  {id:'lovely',name:'러블리',desc:'딸기우유 핑크 + 라벤더',bg:'linear-gradient(135deg,#ffd6e7,#eadcff)',fg:'#ff5c97',dots:['#ff5c97','#a98bff']},
- {id:'power',name:'파워풀',desc:'블랙 + 블레이즈 오렌지',bg:'repeating-linear-gradient(135deg,#15171b 0 8px,#0a0b0d 8px 16px)',fg:'#ff4a1c',dots:['#ff4a1c','#ffd400']}];
-const SKIN_BG={clean:null,bling:'#120d22',lovely:'#fff3f7',power:'#0a0b0d'};
+ {id:'power',name:'파워풀',desc:'블랙 + 블레이즈 오렌지',bg:'repeating-linear-gradient(135deg,#15171b 0 8px,#0a0b0d 8px 16px)',fg:'#ff4a1c',dots:['#ff4a1c','#ffd400']},
+ {id:'neon',name:'네온 사이버',desc:'발광 그리드 + 스캔라인',bg:'linear-gradient(#06060c,#06060c) padding-box,repeating-linear-gradient(90deg,#00f0ff33 0 1px,transparent 1px 12px)',fg:'#00f0ff',dots:['#00f0ff','#ff2bd6']},
+ {id:'pixel',name:'8비트 레트로',desc:'픽셀 글꼴 + 게임기 감성',bg:'#2a2f63',fg:'#ffcd3c',dots:['#ffcd3c','#ff5c5c'],font:'Galmuri11'},
+ {id:'aurora',name:'오로라 글래스',desc:'흐르는 오로라 + 유리 카드',bg:'radial-gradient(circle at 20% 20%,#2dd4bf,transparent 60%),radial-gradient(circle at 80% 30%,#8b5cf6,transparent 60%),#0b1026',fg:'#ffffff',dots:['#7cf5c4','#b38cff']},
+ {id:'court',name:'농구 코트',desc:'원목 마루 + 코트 라인',bg:'repeating-linear-gradient(90deg,#b8783d 0 18px,#d39a5d 18px 36px)',fg:'#fff8ef',dots:['#ff6b00','#1d3557']},
+ {id:'note',name:'손글씨 노트',desc:'줄공책 + 볼펜 글씨',bg:'repeating-linear-gradient(0deg,#9fb6e055 0 1px,#fbf8f1 1px 10px)',fg:'#2b59c3',dots:['#2b59c3','#e63946'],font:'Gaegu'}];
+const SKIN_BG={clean:null,bling:'#120d22',lovely:'#fff3f7',power:'#0a0b0d',neon:'#06060c',pixel:'#1d2045',aurora:'#0b1026',court:'#c98b4e',note:'#fbf8f1'};
 function curSkin(){const t=S.loaded&&P(S.me).theme;return SKINS.some(x=>x.id===t)?t:(lsGet('gn_skin')||'clean')}
 function applySkin(tint){const sk=curSkin();const r=document.documentElement;r.dataset.skin=sk;
   if(sk==='clean'){r.style.setProperty('--me',tint||'var(--slate)')}else r.style.removeProperty('--me');
@@ -393,11 +505,11 @@ function targetText(it){const e=EX[it.ex];if(!e)return'';const reps=e.k==='time'
   if(e.k==='load')return +it.weight?`${fmtN(it.weight)}kg${e.per?'(한손)':''} · ${it.sets}×${reps}`:`맨몸 · ${it.sets}×${reps}`;
   if(e.k==='assist')return`보조 ${fmtN(it.weight)}kg · ${it.sets}×${reps}`;
   return`${it.sets}×${reps}`}
-const IMGID={"leg_press":"Leg_Press","goblet_squat":"Goblet_Squat","back_squat":"Barbell_Squat","leg_ext":"Leg_Extensions","leg_curl":"Seated_Leg_Curl","db_rdl":"Stiff-Legged_Dumbbell_Deadlift","hip_thrust":"Barbell_Hip_Thrust","glute_bridge":"Butt_Lift_Bridge","hip_abd":"Thigh_Abductor","calf_raise":"Standing_Calf_Raises","calf_bw":"Standing_Calf_Raises","step_up":"Dumbbell_Step_Ups","lunge":"Dumbbell_Lunges","bss":"Split_Squat_with_Dumbbells","chest_press":"Leverage_Chest_Press","bench":"Barbell_Bench_Press_-_Medium_Grip","db_bench":"Dumbbell_Bench_Press","incline_db":"Incline_Dumbbell_Press","pec_deck":"Butterfly","pushup":"Incline_Push-Up","lat_pull":"Wide-Grip_Lat_Pulldown","seated_row":"Seated_Cable_Rows","db_row":"One-Arm_Dumbbell_Row","assist_pullup":"Pullups","pullup":"Pullups","back_ext":"Hyperextensions_Back_Extensions","superman":"Superman","face_pull":"Face_Pull","db_rear_fly":"Seated_Bent-Over_Rear_Delt_Raise","shoulder_press_m":"Leverage_Shoulder_Press","db_ohp":"Dumbbell_Shoulder_Press","lat_raise":"Side_Lateral_Raise","cable_er":"External_Rotation_with_Cable","db_er":"External_Rotation","db_curl":"Dumbbell_Bicep_Curl","pushdown":"Triceps_Pushdown_-_Rope_Attachment","bench_dip":"Bench_Dips","rev_wrist":"Seated_Dumbbell_Palms-Down_Wrist_Curl","plank":"Plank","side_plank":"Side_Bridge","dead_bug":"Dead_Bug","pallof":"Pallof_Press","hanging_knee":"Hanging_Leg_Raise"};
+const IMGID={"leg_press":"Leg_Press","goblet_squat":"Goblet_Squat","back_squat":"Barbell_Squat","leg_ext":"Leg_Extensions","leg_curl":"Seated_Leg_Curl","db_rdl":"Stiff-Legged_Dumbbell_Deadlift","hip_thrust":"Barbell_Hip_Thrust","glute_bridge":"Butt_Lift_Bridge","hip_abd":"Thigh_Abductor","calf_raise":"Standing_Calf_Raises","calf_bw":"Standing_Calf_Raises","step_up":"Dumbbell_Step_Ups","lunge":"Dumbbell_Lunges","bss":"Split_Squat_with_Dumbbells","chest_press":"Leverage_Chest_Press","bench":"Barbell_Bench_Press_-_Medium_Grip","db_bench":"Dumbbell_Bench_Press","incline_db":"Incline_Dumbbell_Press","pec_deck":"Butterfly","pushup":"Incline_Push-Up","lat_pull":"Wide-Grip_Lat_Pulldown","seated_row":"Seated_Cable_Rows","db_row":"One-Arm_Dumbbell_Row","assist_pullup":"Pullups","pullup":"Pullups","back_ext":"Hyperextensions_Back_Extensions","superman":"Superman","face_pull":"Face_Pull","db_rear_fly":"Seated_Bent-Over_Rear_Delt_Raise","shoulder_press_m":"Leverage_Shoulder_Press","db_ohp":"Dumbbell_Shoulder_Press","lat_raise":"Side_Lateral_Raise","cable_er":"External_Rotation_with_Cable","db_er":"External_Rotation","db_curl":"Dumbbell_Bicep_Curl","pushdown":"Triceps_Pushdown_-_Rope_Attachment","bench_dip":"Bench_Dips","rev_wrist":"Seated_Dumbbell_Palms-Down_Wrist_Curl","plank":"Plank","side_plank":"Side_Bridge","dead_bug":"Dead_Bug","pallof":"Pallof_Press","hanging_knee":"Hanging_Leg_Raise","ankle_abc":"Ankle_Circles","sl_balance_foam":"Balance_Board","heel_raise_ecc":"Standing_Calf_Raises","sl_calf":"Standing_Calf_Raises","sl_hop":"Single-Leg_Hop_Progression","lat_hop":"Lateral_Cone_Hops","box_jump":"Front_Box_Jump","broad_jump":"Standing_Long_Jump","jump_squat":"Freehand_Jump_Squat","depth_jump":"Linear_Depth_Jump","lat_bound":"Lateral_Bound","pogo":"Hurdle_Hops","mb_slam":"Overhead_Slam","mb_chest":"Medicine_Ball_Chest_Pass","mb_scoop":"Medicine_Ball_Scoop_Throw","plyo_pushup":"Plyo_Push-up","kb_swing":"One-Arm_Kettlebell_Swings","trap_dl":"Trap_Bar_Deadlift","sl_rdl":"Kettlebell_One-Legged_Deadlift","nordic":"Natural_Glute_Ham_Raise","pro_agility":"Single-Cone_Sprint_Drill","sprint_10":"Wind_Sprints","scaption":"Dumbbell_Scaption","band_pullapart":"Band_Pull_Apart"};
 const IMG_BASE='https://raw.githubusercontent.com/yuhonas/free-exercise-db/f00c92c7dcf1216a928a52c3706c7ce8e2f71ed5/exercises/';
 const imgSrc=(id,i)=>IMG_BASE+IMGID[id]+'/'+i+'.jpg';
 const hasImg=id=>EX[id]&&!EX[id].noimg&&!!IMGID[id];
-const YTV=/*YTV*/{"leg_press":{"id":"UwQ3alQfVNI","title":"레그프레스 머신사용법 (많이하는 실수, 잘못된자세)ㅣ고민수","channel":"Minsoo Go"},"goblet_squat":{"id":"lI6Z6VIhOR4","title":"3분이면 끝!👊  고블릿 스쿼트 자세 제대로 하는 법 - 덤벨 운동 언니에게 배워봐!","channel":"빅씨스 Bigsis"},"back_squat":{"id":"wQmJ0S8tgXs","title":"바벨 스쿼트 정자세 완전 정복ㅣ고민수","channel":"Minsoo Go"},"leg_ext":{"id":"-aq4AO0U2i8","title":"🔥허벅지 앞라인 만들기! 💥레그 익스텐션 머신 제대로 쓰는 법｜헬스기구 사용법 기초편","channel":"서단TV"},"leg_curl":{"id":"Fc8JsvwkcxQ","title":"시티드 레그컬, 초보도 이 영상 보면 100% 활용 가능(정확한 사용법)","channel":"일상의운동PT"},"db_rdl":{"id":"HZdXx9YeyQw","title":"프로 운동 선수나 일반인 모두 즐겨하는 하체 운동 (덤벨 루마니안 데드리프트)","channel":"진사마-더 나은 삶을 위한 운동"},"hip_thrust":{"id":"kNv-0UEUb2Q","title":"힙업 운동. 완벽한 힙 쓰러스트 강의 [운동의 정석]","channel":"피지컬갤러리"},"glute_bridge":{"id":"nHtqwo41fYU","title":"글루트 브리지의 모든 것｜글루트 브리지 가이드｜한글자막 CC","channel":"사이언스북스"},"hip_abd":{"id":"PJoENtVxwUw","title":"[1분 PT] 힙 어브덕션 / 아웃타이 / 엉덩이 운동 배우기","channel":"피지컬뷰티"},"calf_raise":{"id":"CvCwt73by-k","title":"종아리운동, 하체운동, 카프 레이즈(Calf raise) ,헬스장기구사용법, 헬스장 운동기구사용법[건디ROY]","channel":"건디ROY"},"calf_bw":{"id":"zI0_oDgVB9s","title":"[발목강화] 러닝, 스쿼트 잘 해지는 비 카프레이즈, 제대로 하는 방법","channel":"운동에 진심(엄선생)"},"step_up":{"id":"KKc9E2Bwuao","title":"89. 덤벨 스텝 업 l 의자를 이용한 신장성 운동, 스텝업 1단계(초급) l DUMBBELL STEP UP l FITT","channel":"피트 FITT tv"},"lunge":{"id":"hUmBiliRwgs","title":"덤벨 런지(dumbbell lunge), 덤벨운동, 하체운동, 전신운동, 운동, 다이어트, 헬스장 운동[건디ROY]","channel":"건디ROY"},"bss":{"id":"riKGAQtl2DM","title":"힙업 하체 강화 최고의 운동! 불가리안 스플릿 스쿼트 제대로 하는 법","channel":"G.O PT 지오피티"},"chest_press":{"id":"t1OA9Mi5N94","title":"헬스장 초보자 기구 사용법 / [가슴운동] 체스트프레스 머신 [오픈짐] / How to chest press machine OPENGYM work out","channel":"오픈짐"},"bench":{"id":"TN5bhAnLE5E","title":"[벤치프레스] 근비대를 위한 진짜 벤치프레스 (벤치프레스를 위해 알아야할 자세와 방법)","channel":"알고하는 헬스"},"db_bench":{"id":"xTQL6jvVMNA","title":"몸짱공식 l 가슴운동 덤벨 프레스 초급자도 쉽게 마스터 하는 영상","channel":"한조바디"},"incline_db":{"id":"xdMNTDExqXQ","title":"윗가슴 끌어 올리기 인클라인 덤벨 프레스 초보자 자세 집중편","channel":"MSG훈"},"pec_deck":{"id":"jLruCpGLGI4","title":"가슴운동 [펙덱플라이] 헬스초보 운동기구 사용법 / 헬린이를 위한 머신 완벽 가이드! 원포인트 레슨!","channel":"몸트TV"},"pushup":{"id":"WKwdWxvdV9M","title":"「이수나 트레이너가 알려주는 1분운동과학센터」 - 인클라인벤치 푸쉬업 배워보자!(헬스/맨몸운동)","channel":"봉남Prof"},"lat_pull":{"id":"VCbhdTq3ha8","title":"🔥등 넓히는 첫걸음! 💪랫풀다운 머신 제대로 쓰는 법｜헬스기구 사용법 기초편","channel":"서단TV"},"seated_row":{"id":"BS9mKBlcOTM","title":"💥등근육 제대로 잡자! 💪시티드로우 머신 사용법｜헬스기구 사용법 기초편","channel":"서단TV"},"db_row":{"id":"uxqINskocmA","title":"'원 암 덤벨 로우' 정확한 자세를 베워보자","channel":"스포니스 스포츠의학 건강&운동 정보 채널"},"assist_pullup":{"id":"nfORs3t0G44","title":"등 운동 [어시스트 풀업] 헬스초보 운동기구 사용법 / 헬린이를 위한 머신 완벽 가이드! 원포인트 레슨!","channel":"몸트TV"},"pullup":{"id":"so2B238Ywbg","title":"풀업, 턱걸이 자세(광배자극O, 어깨통증X)","channel":"네이처PT"},"back_ext":{"id":"0sHSEwU-Fqs","title":"📌허리 강화는 이걸로! 💥백 익스텐션 머신 사용법｜헬스기구 사용법 기초편","channel":"서단TV"},"superman":{"id":"feymzF3qq_E","title":"슈퍼맨 운동[삼성서울병원 스포츠의학실 체조]","channel":"삼성서울병원"},"face_pull":{"id":"-asNNES5taw","title":"승모 말고 어깨후면 키우라고요 (페이스풀 제대로 하는 법)","channel":"제로범TV _김영범"},"db_rear_fly":{"id":"h-dF7qYPF9E","title":"등 상부를 강화하는 플라이 동작｜덤벨 리어 델트 플라이｜한글 자막","channel":"사이언스북스"},"shoulder_press_m":{"id":"LERNxsyTM7M","title":"💥탄탄한 어깨 만들기! 💪숄더프레스 머신 사용법｜헬스기구 사용법 기초편","channel":"서단TV"},"db_ohp":{"id":"uPb0h4AhYQs","title":"덤벨 숄더프레스 제대로 하는 방법!","channel":"운동에 진심(엄선생)"},"lat_raise":{"id":"_jBCGQZ7JlY","title":"사이드 레터럴 레이즈, 꼭 알아야 할 기본 자세 !!","channel":"헬파티HellParty"},"cable_er":{"id":"ASicqy_wcA8","title":"[1분 PT] 풀리 익스터널 암 로테이션 / 회전근개 어깨후면 운동","channel":"피지컬뷰티"},"db_er":{"id":"DoLsRpP6PtU","title":"어깨안정성. 회전근개 / 사이드라잉 익스터널 로테이션","channel":"Twosome Studio 투썸 스튜디오"},"db_curl":{"id":"cOver4_h5Uw","title":"덤벨컬의 기본자세 l 팔을 돌려야 이두근이 커진다!","channel":"한조바디"},"pushdown":{"id":"YapKOCYM-P8","title":"EP24.아무도 설명 안해주는 케이블 푸쉬다운/프레스다운 하는 방법","channel":"미코TV"},"bench_dip":{"id":"3jMstQ5bIm0","title":"[1분 PT] 트라이셉스 딥 / 벤치 딥스","channel":"피지컬뷰티"},"rev_wrist":{"id":"DwPA31mKiFI","title":"[1분 PT] 리스트컬 & 리버스리스트컬 / 손목운동 / 전완근운동","channel":"피지컬뷰티"},"plank":{"id":"Zq8nRY9P_cM","title":"플랭크의 정석. 가장 \"완벽한 플랭크\" 정자세 배우기 교본","channel":"바벨라토르 홈트레이닝 BARBELLATOR"},"side_plank":{"id":"vm2GEpNL7NU","title":"헬스 초보 사이드 플랭크 운동 자세 : 측면 코어","channel":"오늘헬스 영포티"},"dead_bug":{"id":"EHn2WswT5uU","title":"코어운동의 기본! 플랭크 보다 중요한 [데드버그] 단계별 운동방법","channel":"움직이기"},"pallof":{"id":"OOpz4I9e13E","title":"최강코어 만들기, 팔로프 프레스를 배워봅시다 (Pallof Press)","channel":"수행자TV"},"hanging_knee":{"id":"p9hhX_Sx5v0","title":"The Hanging Knee Raise | A Tutorial","channel":"Signum Fitness & Nutrition"}};
+const YTV=/*YTV*/{"leg_press":{"id":"UwQ3alQfVNI","title":"레그프레스 머신사용법 (많이하는 실수, 잘못된자세)ㅣ고민수","channel":"Minsoo Go"},"goblet_squat":{"id":"lI6Z6VIhOR4","title":"3분이면 끝!👊  고블릿 스쿼트 자세 제대로 하는 법 - 덤벨 운동 언니에게 배워봐!","channel":"빅씨스 Bigsis"},"back_squat":{"id":"wQmJ0S8tgXs","title":"바벨 스쿼트 정자세 완전 정복ㅣ고민수","channel":"Minsoo Go"},"leg_ext":{"id":"-aq4AO0U2i8","title":"🔥허벅지 앞라인 만들기! 💥레그 익스텐션 머신 제대로 쓰는 법｜헬스기구 사용법 기초편","channel":"서단TV"},"leg_curl":{"id":"Fc8JsvwkcxQ","title":"시티드 레그컬, 초보도 이 영상 보면 100% 활용 가능(정확한 사용법)","channel":"일상의운동PT"},"db_rdl":{"id":"HZdXx9YeyQw","title":"프로 운동 선수나 일반인 모두 즐겨하는 하체 운동 (덤벨 루마니안 데드리프트)","channel":"진사마-더 나은 삶을 위한 운동"},"hip_thrust":{"id":"kNv-0UEUb2Q","title":"힙업 운동. 완벽한 힙 쓰러스트 강의 [운동의 정석]","channel":"피지컬갤러리"},"glute_bridge":{"id":"nHtqwo41fYU","title":"글루트 브리지의 모든 것｜글루트 브리지 가이드｜한글자막 CC","channel":"사이언스북스"},"hip_abd":{"id":"PJoENtVxwUw","title":"[1분 PT] 힙 어브덕션 / 아웃타이 / 엉덩이 운동 배우기","channel":"피지컬뷰티"},"calf_raise":{"id":"CvCwt73by-k","title":"종아리운동, 하체운동, 카프 레이즈(Calf raise) ,헬스장기구사용법, 헬스장 운동기구사용법[건디ROY]","channel":"건디ROY"},"calf_bw":{"id":"zI0_oDgVB9s","title":"[발목강화] 러닝, 스쿼트 잘 해지는 비 카프레이즈, 제대로 하는 방법","channel":"운동에 진심(엄선생)"},"step_up":{"id":"KKc9E2Bwuao","title":"89. 덤벨 스텝 업 l 의자를 이용한 신장성 운동, 스텝업 1단계(초급) l DUMBBELL STEP UP l FITT","channel":"피트 FITT tv"},"lunge":{"id":"hUmBiliRwgs","title":"덤벨 런지(dumbbell lunge), 덤벨운동, 하체운동, 전신운동, 운동, 다이어트, 헬스장 운동[건디ROY]","channel":"건디ROY"},"bss":{"id":"riKGAQtl2DM","title":"힙업 하체 강화 최고의 운동! 불가리안 스플릿 스쿼트 제대로 하는 법","channel":"G.O PT 지오피티"},"chest_press":{"id":"t1OA9Mi5N94","title":"헬스장 초보자 기구 사용법 / [가슴운동] 체스트프레스 머신 [오픈짐] / How to chest press machine OPENGYM work out","channel":"오픈짐"},"bench":{"id":"TN5bhAnLE5E","title":"[벤치프레스] 근비대를 위한 진짜 벤치프레스 (벤치프레스를 위해 알아야할 자세와 방법)","channel":"알고하는 헬스"},"db_bench":{"id":"xTQL6jvVMNA","title":"몸짱공식 l 가슴운동 덤벨 프레스 초급자도 쉽게 마스터 하는 영상","channel":"한조바디"},"incline_db":{"id":"xdMNTDExqXQ","title":"윗가슴 끌어 올리기 인클라인 덤벨 프레스 초보자 자세 집중편","channel":"MSG훈"},"pec_deck":{"id":"jLruCpGLGI4","title":"가슴운동 [펙덱플라이] 헬스초보 운동기구 사용법 / 헬린이를 위한 머신 완벽 가이드! 원포인트 레슨!","channel":"몸트TV"},"pushup":{"id":"WKwdWxvdV9M","title":"「이수나 트레이너가 알려주는 1분운동과학센터」 - 인클라인벤치 푸쉬업 배워보자!(헬스/맨몸운동)","channel":"봉남Prof"},"lat_pull":{"id":"VCbhdTq3ha8","title":"🔥등 넓히는 첫걸음! 💪랫풀다운 머신 제대로 쓰는 법｜헬스기구 사용법 기초편","channel":"서단TV"},"seated_row":{"id":"BS9mKBlcOTM","title":"💥등근육 제대로 잡자! 💪시티드로우 머신 사용법｜헬스기구 사용법 기초편","channel":"서단TV"},"db_row":{"id":"uxqINskocmA","title":"'원 암 덤벨 로우' 정확한 자세를 베워보자","channel":"스포니스 스포츠의학 건강&운동 정보 채널"},"assist_pullup":{"id":"nfORs3t0G44","title":"등 운동 [어시스트 풀업] 헬스초보 운동기구 사용법 / 헬린이를 위한 머신 완벽 가이드! 원포인트 레슨!","channel":"몸트TV"},"pullup":{"id":"so2B238Ywbg","title":"풀업, 턱걸이 자세(광배자극O, 어깨통증X)","channel":"네이처PT"},"back_ext":{"id":"0sHSEwU-Fqs","title":"📌허리 강화는 이걸로! 💥백 익스텐션 머신 사용법｜헬스기구 사용법 기초편","channel":"서단TV"},"superman":{"id":"feymzF3qq_E","title":"슈퍼맨 운동[삼성서울병원 스포츠의학실 체조]","channel":"삼성서울병원"},"face_pull":{"id":"-asNNES5taw","title":"승모 말고 어깨후면 키우라고요 (페이스풀 제대로 하는 법)","channel":"제로범TV _김영범"},"db_rear_fly":{"id":"h-dF7qYPF9E","title":"등 상부를 강화하는 플라이 동작｜덤벨 리어 델트 플라이｜한글 자막","channel":"사이언스북스"},"shoulder_press_m":{"id":"LERNxsyTM7M","title":"💥탄탄한 어깨 만들기! 💪숄더프레스 머신 사용법｜헬스기구 사용법 기초편","channel":"서단TV"},"db_ohp":{"id":"uPb0h4AhYQs","title":"덤벨 숄더프레스 제대로 하는 방법!","channel":"운동에 진심(엄선생)"},"lat_raise":{"id":"_jBCGQZ7JlY","title":"사이드 레터럴 레이즈, 꼭 알아야 할 기본 자세 !!","channel":"헬파티HellParty"},"cable_er":{"id":"ASicqy_wcA8","title":"[1분 PT] 풀리 익스터널 암 로테이션 / 회전근개 어깨후면 운동","channel":"피지컬뷰티"},"db_er":{"id":"DoLsRpP6PtU","title":"어깨안정성. 회전근개 / 사이드라잉 익스터널 로테이션","channel":"Twosome Studio 투썸 스튜디오"},"db_curl":{"id":"cOver4_h5Uw","title":"덤벨컬의 기본자세 l 팔을 돌려야 이두근이 커진다!","channel":"한조바디"},"pushdown":{"id":"YapKOCYM-P8","title":"EP24.아무도 설명 안해주는 케이블 푸쉬다운/프레스다운 하는 방법","channel":"미코TV"},"bench_dip":{"id":"3jMstQ5bIm0","title":"[1분 PT] 트라이셉스 딥 / 벤치 딥스","channel":"피지컬뷰티"},"rev_wrist":{"id":"DwPA31mKiFI","title":"[1분 PT] 리스트컬 & 리버스리스트컬 / 손목운동 / 전완근운동","channel":"피지컬뷰티"},"plank":{"id":"Zq8nRY9P_cM","title":"플랭크의 정석. 가장 \"완벽한 플랭크\" 정자세 배우기 교본","channel":"바벨라토르 홈트레이닝 BARBELLATOR"},"side_plank":{"id":"vm2GEpNL7NU","title":"헬스 초보 사이드 플랭크 운동 자세 : 측면 코어","channel":"오늘헬스 영포티"},"dead_bug":{"id":"EHn2WswT5uU","title":"코어운동의 기본! 플랭크 보다 중요한 [데드버그] 단계별 운동방법","channel":"움직이기"},"pallof":{"id":"OOpz4I9e13E","title":"최강코어 만들기, 팔로프 프레스를 배워봅시다 (Pallof Press)","channel":"수행자TV"},"hanging_knee":{"id":"p9hhX_Sx5v0","title":"The Hanging Knee Raise | A Tutorial","channel":"Signum Fitness & Nutrition"},"box_jump":{"id":"aw02mXsm37k","title":"크로스핏_09_Box jump (박스 점프)","channel":"스포츠망고"},"broad_jump":{"id":"RPo2frb2e3s","title":"제자리멀리뛰기 잘하는 법 (소방,경찰,체대입시생을 위한 꿀팁!)","channel":"민코치"},"jump_squat":{"id":"k4-Ph_zv_4w","title":"재미있게 할 수 있는 스쿼트 동작이 있다? \"점프 스쿼트\"_데일리바디핏 EP 27_2","channel":"메디컬TV MedicalTV"},"depth_jump":{"id":"EqKPPvjciZ0","title":"How To: Depth Jumps","channel":"Tom Houpt"},"lat_bound":{"id":"usZgF8TBWcA","title":"Skater Jumps Lateral Bounds","channel":"Made Possible Personal Training"},"pogo":{"id":"bJXFYTurPpA","title":"포고 점프-축구선수 스피드 트레이닝 순발력 민첩성 향상을 위한 플라이오메트릭스 (Plyimeteics POGO Jump)","channel":"민코치"},"approach_jump":{"id":"A5LAxy-fD0I","title":"Approach Jump Technique - How to Perform a Volleyball Approach Jump","channel":"Drees Performance Training"},"mb_slam":{"id":"EsAhU1jHpiQ","title":"Med Ball Slams (Exercise Library)","channel":"Horton Barbell"},"mb_chest":{"id":"e-zHTwXA8mE","title":"Standing Medicine Ball Chest Pass - Viking Strength Systems","channel":"Viking Strength Systems"},"mb_scoop":{"id":"woDIxfT4MXU","title":"Medicine Ball Scoop Toss","channel":"Adirondack Club"},"plyo_pushup":{"id":"3_OMwzCYzFE","title":"플라이오메트릭 푸쉬 업(Plyometric Push Up)","channel":"FITSIG"},"kb_swing":{"id":"WIaDkTJPwGI","title":"95%가 틀리는 케틀벨 스윙, 이 영상 하나로 끝납니다(7단계 완벽 가이드)","channel":"무디럭 재활운동전문가 movedesignlab"},"trap_dl":{"id":"HCFTFM8jIwg","title":"Trap Bar Deadlift Form (Make Every Rep PERFECT!)","channel":"Criticalbench"},"sl_rdl":{"id":"wKR8FRvhh9g","title":"덤벨 싱글 레그 루마니안 데드리프트","channel":"트레이너강* 피트니스월드"},"nordic":{"id":"5p4vqonbBqs","title":"햄스트링 부상방지에 좋은 노르딕 햄스트링 컬 nordic hamstring curl 야구선수 트레이닝","channel":"김출력"},"copenhagen":{"id":"J6YOpOfvDqY","title":"코펜하겐 플랭크(Copenhagen Plank) 운동을 꼭 해야 되는 이유!","channel":"더건강한피티"},"defense_slide":{"id":"0ChhB2qLdeY","title":"[마포구체육회] 🏀쉽게 배우는 농구교실-기본 수비, 사이드 스텝, 수비 예절 / basketball / Defense / side step","channel":"Mapo-Gu Sports Council [마포구체육회]"},"pro_agility":{"id":"qYDXaXRodWc","title":"How to Properly Run the Pro Agility (5-10-5)","channel":"SKLZ"},"sprint_10":{"id":"-SV2U7dMUMg","title":"COACHING ACCELERATION AND THE SPRINT START - MUST-DO’S","channel":"John Shepherd track & field coach"},"scaption":{"id":"3sjZXAH4x2c","title":"'덤벨 스캡션(Scaption) 어깨 가동성 운동' 방법 / 대전 PT쌤👍 '트레이닝센터 바른'","channel":"트레이닝센터바른"},"band_pullapart":{"id":"CNh2RxeJ9xY","title":"'밴드 풀 어파트, Band Pull-Apart' 굳은 어깨 교정 운동 방법 / 대전 노은동 PT쌤👍 '트레이닝센터 바른'","channel":"트레이닝센터바른"},"ankle_abc":{"id":"paZ6T7EbmqM","title":"Ankle Alphabet Exercise - Preventing and Recovering From an Ankle Injury or Sprain","channel":"Center For Total Back Care"},"band_ev":{"id":"xfrncpP5ONQ","title":"Ankle Eversion with Resistive Band - Ask Doctor Jo","channel":"AskDoctorJo"},"band_inv":{"id":"f7jv9tKAUcg","title":"발목 내번 밴드 운동[삼성서울병원 스포츠의학실 체조]","channel":"삼성서울병원"},"band_df":{"id":"EJpXZ5Rar7M","title":"발목 배측굴곡 밴드 운동[삼성서울병원 스포츠의학실 체조]","channel":"삼성서울병원"},"sl_balance":{"id":"ip0QBWjZFjM","title":"한 발로 서기[삼성서울병원 스포츠의학실 체조]","channel":"삼성서울병원"},"sl_balance_foam":{"id":"NIh0i8GokuY","title":"Single Leg Balance With Foam Pad","channel":"Elite Performance Institute"},"heel_raise_ecc":{"id":"in_T4uPaYGE","title":"Two Up, One Down Heel Raise | Ankle Stability Exercise Series","channel":"Therapeutic EDGE"},"sl_calf":{"id":"qPd73snQfUs","title":"Single-Leg Calf Raise (HSS)","channel":"Hospital for Special Surgery"},"towel_scrunch":{"id":"uqMVDIC24yg","title":"발가락으로 수건 당기기","channel":"인제대학교 백병원 스포츠의학연구소"},"star_excursion":{"id":"TTsILaFZy3E","title":"Physiotherapy: Star excursion for ankle and knee stability","channel":"East Cheshire NHS Trust"},"sl_hop":{"id":"tawxi_JFcKA","title":"Ankle Sprain Injury: One Leg Hops","channel":"INSYNC PHYSIO Vancouver"},"lat_hop":{"id":"5KlMhxhJWuQ","title":"Plyometric Training for Foot & Ankle - Exercise 2 - Single Leg Line Hops Lateral","channel":"Elevate Physical Therapy & Fitness"}};
 function ytLinks(id){const e=EX[id];const ko=e.n+' '+(['머신','케이블'].includes(e.eq)?'머신 사용법':'정확한 자세');const en=e.img+' proper form';
   return{ko:'https://www.youtube.com/results?search_query='+encodeURIComponent(ko),en:'https://www.youtube.com/results?search_query='+encodeURIComponent(en)}}
 
@@ -446,8 +558,9 @@ function estStart(id,p){const e=EX[id];const lf=(LEVELF[p.level]||1)*ageF(p.age)
   if(e.k==='load')return Math.max(e.inc,roundTo(bw*e.r[f]*lf,e.inc));
   if(e.k==='assist')return roundTo(Math.max(0,bw*e.r[f]-(lf-1)*.25*bw),e.inc);
   return 0}
-const INJURY=[[/발목|아킬레스|족저/,'발목',['calf_raise','calf_bw','step_up','lunge','bss','goblet_squat','back_squat']],
- [/무릎|슬개|십자인대|반월/,'무릎',['leg_ext','lunge','bss','back_squat','step_up','goblet_squat']],
+const PLYO=['box_jump','broad_jump','jump_squat','depth_jump','lat_bound','pogo','approach_jump','pro_agility','sprint_10','defense_slide','sl_hop','lat_hop','mb_scoop','kb_swing'];
+const INJURY=[[/발목|아킬레스|족저/,'발목',['calf_raise','calf_bw','step_up','lunge','bss','goblet_squat','back_squat','sl_calf','sl_rdl',...PLYO]],
+ [/무릎|슬개|십자인대|반월/,'무릎',['leg_ext','lunge','bss','back_squat','step_up','goblet_squat','nordic',...PLYO]],
  [/허리|디스크|요통/,'허리',['back_squat','db_rdl','back_ext','superman','hip_thrust']],
  [/어깨|회전근|충돌/,'어깨',['shoulder_press_m','db_ohp','bench_dip','lat_raise','bench','pec_deck']],
  [/손목|팔꿈치|엘보/,'손목·팔꿈치',['pushup','bench_dip','db_curl','pushdown']]];
@@ -455,23 +568,31 @@ function injuryBlock(notes){const n=String(notes||'');const hit=INJURY.filter(([
 function genRule(p){const inj=injuryBlock(p.notes);
   const days=Math.min(5,Math.max(2,+p.days||3));const g=GOALS[p.goal]||GOALS['균형·체력'];const mins=+p.minutes||60;
   const n=mins<=40?4:mins<=50?5:mins<=60?6:7;const home=p.env==='홈(덤벨·맨몸)';const age=+p.age||0;
-  const beg=p.level==='초급'||(age&&age<18);const older=age>=55;
-  const out=TPL[days].map(([key,title,list])=>{const used=new Set();const items=[];
+  const beg=p.level==='초급'||(age&&age<18);const older=age>=55;const ath=!!g.ath;const novice=p.level==='초급';
+  const out=(ath?TPL_ATH:TPL)[days].map(([key,title,list])=>{const used=new Set();const items=[];
     for(let id of list){
       if(beg&&EX[id].beg)id=EX[id].beg;
       if(home&&!['덤벨','맨몸'].includes(EX[id].eq))id=EX[id].alt||id;
       if(home&&!['덤벨','맨몸'].includes(EX[id].eq))continue;
-      if(used.has(id)||!EX[id]||inj.ex.has(id))continue;used.add(id);
+      if(used.has(id)||!EX[id]||inj.ex.has(id)||(EX[id].adv&&novice))continue;used.add(id);
       const e=EX[id];const acc=e.p==='코어'||e.k==='bw'||e.k==='time'||['cable_er','db_er','rev_wrist','face_pull','lat_raise','calf_raise','calf_bw','hip_abd'].includes(id);
       let min=acc?10:g.min,max=acc?15:g.max;if((beg||older)&&p.goal==='근력'&&!acc){min=8;max=10}
       if(e.k==='time'){min=beg?20:30;max=beg?30:45}
-      items.push({ex:id,sets:acc?Math.min(3,g.sets):g.sets,min,max,weight:estStart(id,p),rest:(acc?60:g.rest)+(older?15:0),est:true});
+      if(e.pw){min=3;max=5}
+      if(e.reps){[min,max]=e.reps}
+      items.push({ex:id,sets:acc?Math.min(3,g.sets):g.sets,min,max,weight:estStart(id,p),rest:e.pw?120:(acc?60:g.rest)+(older?15:0),est:true});
       if(items.length>=n)break}
     return{key,title,focus:'',items,warmup:older?'실내자전거 7분 + 관절 돌리기·동적 스트레칭 5분':'실내자전거 5분 + 동적 스트레칭 3분',finisher:p.goal==='체지방 감량'?'인터벌 15분 (빠르게 30초 + 천천히 90초)':'가벼운 유산소 10분 + 정적 스트레칭 5분'}});
+  if(inj.names.includes('발목')){const rh=REHAB.발목;const lower=out.filter(d=>/하체|점프|전신|민첩/.test(d.title));const pool=lower.length?lower:out;const tgt=[0,1].map(i=>pool[Math.min(i,pool.length-1)]);
+    rh.forEach((id,i)=>{const d=tgt[i<3?0:1];if(d.items.some(x=>x.ex===id))return;const e=EX[id];d.items.unshift({ex:id,sets:2,min:e.k==='time'?30:12,max:e.k==='time'?45:20,weight:0,rest:30,note:'발목 재활'})});
+    const fill=['star_excursion','towel_scrunch','band_df','pallof','side_plank','face_pull','dead_bug','hip_abd'];
+    out.forEach(d=>{for(const id of fill){if(d.items.length>=4)break;if(d.items.some(x=>x.ex===id))continue;const e=EX[id];d.items.push(e.rehab?{ex:id,sets:2,min:e.k==='time'?30:10,max:e.k==='time'?45:15,weight:0,rest:30,note:'발목 재활'}:{ex:id,sets:3,min:e.k==='time'?20:10,max:e.k==='time'?30:15,weight:estStart(id,p),rest:60,est:true})}});
+    out.forEach(d=>d.items.sort((a,b)=>(EX[b.ex].rehab?1:0)-(EX[a.ex].rehab?1:0)))}
   const notes=['시작 무게는 체중·수준·나이로 추정한 값이에요. 첫 회차에 마지막 2~3회가 힘든 무게로 조정하세요.'];
   if(age&&age<18)notes.push('성장기라 최대 무게 테스트는 하지 말고 자세 위주로 진행하세요.');
   if(older)notes.push('휴식을 15초 늘렸고, 관절 워밍업을 길게 잡았어요.');
-  if(inj.names.length)notes.push(`특이사항(${inj.names.join('·')})을 반영해 부담되는 운동을 뺐어요. 통증이 있으면 중단하고 전문가와 상의하세요.`);
+  if(inj.names.length)notes.push(`특이사항(${inj.names.join('·')})을 반영해 부담되는 운동을 뺐어요.${inj.names.includes('발목')?' 발목 재활 운동을 앞쪽에 넣었어요. 통증 없이 한발 카프레이즈 20회·한발 서기 45초가 되면 점프 운동을 단계적으로 추가하세요.':''} 통증이 있으면 중단하고 전문가와 상의하세요.`);
+  if(ath)notes.push('점프·민첩 운동은 워밍업 직후 몸이 가장 가벼울 때, 세트 사이 충분히 쉬면서 최대 속도로 하세요.');
   return{title:`${p.goal||'균형·체력'} · 주 ${days}회`,source:'rule',startDate:today(),ramp:beg,days:out,notes:notes.join(' ')}}
 
 /* ---------- 점진적 증량 ---------- */
@@ -683,7 +804,7 @@ function vFam(){
 function vGuide(){
   const q=S.guideQ.trim();const list=Object.entries(EX).filter(([,e])=>(S.guidePart==='전체'||e.p===S.guidePart)&&(!q||e.n.includes(q)||e.eq.includes(q)));
   return`<h2>운동 가이드</h2><input class="search" id="guideQ" data-in="gq" placeholder="운동 이름 검색" value="${esc(S.guideQ)}">
-  <div class="filters">${['전체',...PARTS].map(p=>`<button data-act="gpart" data-p="${p}" aria-pressed="${S.guidePart===p}">${p}</button>`).join('')}</div>
+  <div class="filters">${['전체',...GUIDE_PARTS].map(p=>`<button data-act="gpart" data-p="${p}" aria-pressed="${S.guidePart===p}">${p}</button>`).join('')}</div>
   <div class="glist">${list.map(([id,e])=>`<button class="gitem" data-act="howto" data-ex="${id}">${hasImg(id)?`<img src="${imgSrc(id,0)}" alt="" loading="lazy">`:'<span class="noimg">이미지 없음</span>'}<div><b>${esc(e.n)}</b><span class="small muted">${e.p} · ${e.eq}${YTV[id]?' · ▶ 영상':''}</span></div></button>`).join('')||'<div class="empty">검색 결과가 없어요.</div>'}</div>
   <p class="small muted">운동 사진: free-exercise-db (퍼블릭 도메인). 영상: 유튜브 각 채널.</p>`}
 function howtoSheet(id){const e=EX[id];const yt=ytLinks(id);
@@ -700,7 +821,7 @@ function vMe(){
   const vid=S.view||S.me;const m=M(vid);
   let h=`<div class="chips">${memberList().map(x=>`<button class="chip" data-act="view" data-id="${esc(x.id)}" aria-pressed="${x.id===vid}" style="--c:${colorVar(x)}"><span class="plate"></span>${esc(x.name)}${x.id===S.me?' (나)':''}</button>`).join('')}<button class="chip add" data-act="addMember">+ 구성원</button></div>`;
   if(S.addMember)return h+vAddMember();
-  if(vid===S.me){const cur=curSkin();h+=`<section class="card"><div class="row between"><h3>내 테마</h3><span class="small muted">나만 바뀌어요</span></div><div class="skins">${SKINS.map(t=>`<button class="skin" data-act="skin" data-s="${t.id}" aria-pressed="${cur===t.id}"><span class="sw" style="background:${t.bg};color:${t.fg}">${t.name}<span class="row" style="gap:4px">${t.dots.map(d=>`<i style="background:${d}"></i>`).join('')}</span></span><span class="small muted">${t.desc}</span></button>`).join('')}</div></section>`}
+  if(vid===S.me){const cur=curSkin();h+=`<section class="card"><div class="row between"><h3>내 테마</h3><span class="small muted">나만 바뀌어요</span></div><div class="skins">${SKINS.map(t=>`<button class="skin" data-act="skin" data-s="${t.id}" aria-pressed="${cur===t.id}"><span class="sw" style="background:${t.bg};color:${t.fg};${t.font?`font-family:${t.font};font-weight:400`:''}">${t.name}<span class="row" style="gap:4px">${t.dots.map(d=>`<i style="background:${d}"></i>`).join('')}</span></span><span class="small muted">${t.desc}</span></button>`).join('')}</div></section>`}
   h+=`<div class="seg"><button data-act="meSeg" data-s="ach" aria-pressed="${S.meSeg==='ach'}">성취도</button><button data-act="meSeg" data-s="hist" aria-pressed="${S.meSeg==='hist'}">운동 기록</button><button data-act="meSeg" data-s="plan" aria-pressed="${S.meSeg==='plan'}">루틴·프로필</button></div>`;
   if(S.meSeg==='ach')h+=vAch(vid);else if(S.meSeg==='hist')h+=vHist(vid);else h+=vPlan(vid);
   if(vid===S.me)h+=`<p class="small muted" style="text-align:center">앱 버전 ${APP_VER}</p><div class="row" style="justify-content:center"><button class="btn sm ghost" data-act="logout">${S.confirm==='logout'?'정말 로그아웃':'이 기기에서 로그아웃'}</button></div>`;
@@ -748,7 +869,7 @@ function vPlan(id){
       d.items.forEach((it,ii)=>{const e=EX[it.ex];h+=`<div class="editrow"><span>${esc(e?.n||it.ex)}</span><input id="es_${di}_${ii}" data-ed="sets" data-d="${di}" data-i="${ii}" value="${it.sets}" inputmode="numeric" aria-label="세트">
         <span class="row" style="gap:2px;flex-wrap:nowrap"><input id="emi_${di}_${ii}" data-ed="min" data-d="${di}" data-i="${ii}" value="${it.min}" inputmode="numeric" aria-label="최소"><input id="ema_${di}_${ii}" data-ed="max" data-d="${di}" data-i="${ii}" value="${it.max}" inputmode="numeric" aria-label="최대"></span>
         ${e&&['load','assist'].includes(e.k)?`<input id="ew_${di}_${ii}" data-ed="weight" data-d="${di}" data-i="${ii}" value="${fmtN(it.weight)}" inputmode="decimal" aria-label="무게">`:'<span class="small muted">맨몸</span>'}<button class="x" data-act="rmItem" data-d="${di}" data-i="${ii}" aria-label="삭제">×</button></div>`});
-      h+=`<div class="row"><select id="addsel_${di}" aria-label="추가할 운동">${PARTS.map(pp=>`<optgroup label="${pp}">${Object.entries(EX).filter(([,e])=>e.p===pp).map(([x,e])=>`<option value="${x}">${e.n} · ${e.eq}</option>`).join('')}</optgroup>`).join('')}</select><button class="btn sm" data-act="addItem" data-d="${di}">추가</button></div>`}
+      h+=`<div class="row"><select id="addsel_${di}" aria-label="추가할 운동">${GUIDE_PARTS.map(pp=>`<optgroup label="${pp}">${Object.entries(EX).filter(([,e])=>e.p===pp).map(([x,e])=>`<option value="${x}">${e.n} · ${e.eq}</option>`).join('')}</optgroup>`).join('')}</select><button class="btn sm" data-act="addItem" data-d="${di}">추가</button></div>`}
     else{h+=d.items.map(it=>`<div class="exline"><span>${esc(EX[it.ex]?.n||it.ex)}${it.note?`<span class="small muted"> · ${esc(it.note)}</span>`:''}${it.est?' <span class="pill warn">추정</span>':''}</span><span class="num muted">${esc(targetText(it))}</span></div>`).join('');
       if(d.warmup||d.finisher)h+=`<div class="small muted">${d.warmup?'워밍업: '+esc(d.warmup):''}${d.warmup&&d.finisher?'<br>':''}${d.finisher?'마무리: '+esc(d.finisher):''}</div>`}
     h+=`</section>`});
