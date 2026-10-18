@@ -340,7 +340,7 @@ async function load(silent){
     S.me=st.me;lsSet('gn_me',S.me);if(!S.view||!mem[S.view])S.view=S.me;S.loaded=true;
     if(!(silent&&S.tab==='work'&&S.session))render()}
   catch(e){if(!silent||e.auth)toast(e.msg);if(e.auth||!S.loaded){S.loadErr=e.msg;render()}}}
-async function act(fn,body,okMsg){if(S.busy)return false;S.busy=true;try{const r=await api(fn,{p_token:S.token,...body});if(okMsg)toast(okMsg);await load(true);return r??true}catch(e){toast(e.msg);return false}finally{S.busy=false}}
+async function act(fn,body,okMsg){if(S.busy){toast('처리 중이에요. 잠시만요.');return false}S.busy=true;try{const r=await api(fn,{p_token:S.token,...body});if(okMsg)toast(okMsg);await load(true);return r??true}catch(e){toast(e.msg);return false}finally{S.busy=false}}
 function logoutLocal(){S.token=null;lsSet('gn_token',null);S.loaded=false;S.login={step:1,code:'',list:null,busy:false,err:''}}
 
 let toastT;function toast(m){$('#toastSlot').innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>{$('#toastSlot').innerHTML=''},2600)}
@@ -590,7 +590,7 @@ function vPlan(id){
   if(S.profEdit||!p.goal)h+=vProfForm(m);
   else h+=`<div class="row small">${[p.sex,p.age&&p.age+'세',p.height&&p.height+'cm',p.weight&&p.weight+'kg',p.bodyFat&&'체지방 '+p.bodyFat+'%',p.level,p.goal,'주 '+(p.days||3)+'회',(p.minutes||60)+'분',p.env].filter(Boolean).map(x=>`<span class="pill">${esc(x)}</span>`).join('')}</div>${p.notes?`<p class="small muted">${esc(p.notes)}</p>`:''}`;
   h+=`</section><section class="card"><h3>루틴 새로 만들기</h3><p class="small muted">나이·체중·수준·목표·주 횟수·시간·환경을 반영해 주간 루틴을 만들어요. 기존 루틴은 교체되고 기록은 그대로 남아요.</p>
-   <button class="btn pri" data-act="genRule" ${!p.goal?'disabled':''}>${S.confirm==='gen'?'기존 루틴을 바꿀까요? 한 번 더 누르기':'프로필로 루틴 생성'}</button>${!p.goal?'<p class="small muted">먼저 프로필에서 목표를 입력하세요.</p>':''}</section>`;
+   <button class="btn pri wide" data-act="genRule" ${S.busy?'disabled':''}>${S.busy?'만드는 중…':S.confirm==='gen'?'기존 루틴을 바꿀까요? 한 번 더 누르기':'프로필로 루틴 생성'}</button>${!p.goal?'<p class="small muted">목표를 선택하면 바로 만들 수 있어요. 위 프로필 칸에 입력한 값은 이 버튼을 누를 때 함께 저장돼요.</p>':''}</section>`;
   if(!rt)return h+`<div class="card"><div class="empty"><h3>루틴이 아직 없어요</h3><p>위 버튼으로 첫 루틴을 만드세요.</p></div></div>`;
   const editing=!!(S.edit&&S.edit.member===id);
   h+=`<section class="card"><div class="row between"><div><div class="lbl">${rt.source==='rule'?'자동 생성':'직접 구성'} · ${esc(rt.startDate||'')} 시작 · ${weekOf(rt)}주차</div><h2>${esc(rt.title)}</h2></div>${editing?`<div class="row"><button class="btn sm ghost" data-act="editCancel">취소</button><button class="btn sm pri" data-act="editSave">저장</button></div>`:`<button class="btn sm" data-act="editStart">편집</button>`}</div>
@@ -644,10 +644,11 @@ function niceMax(v){const e=Math.pow(10,Math.floor(Math.log10(v)));const f=v/e;r
 function fmtK(v){return v>=1000?fmtN(Math.round(v/100)/10)+'k':fmtN(Math.round(v))}
 
 /* ---------- 이벤트 ---------- */
-document.addEventListener('click',async ev=>{
-  const a=ev.target.closest('[data-act]');if(!a)return;const act=a.dataset.act;
-  if(act==='closeSheetBg'&&ev.target!==a)return;
-  switch(act){
+document.addEventListener('click',ev=>{onClick(ev).catch(e=>{S.busy=false;toast('오류: '+(e&&(e.msg||e.message)||e));render()})});
+async function onClick(ev){
+  const a=ev.target.closest('[data-act]');if(!a)return;const k=a.dataset.act;
+  if(k==='closeSheetBg'&&ev.target!==a)return;
+  switch(k){
    case'tab':S.tab=a.dataset.tab;lsSet('gn_tab',S.tab);S.addMember=false;S.confirm=null;if(S.tab==='me'&&a.id==='whoBtn')S.view=S.me;window.scrollTo(0,0);break;
    case'goPlan':S.tab='me';S.view=S.me;S.meSeg='plan';lsSet('gn_tab','me');break;
    case'view':S.view=a.dataset.id;S.edit=null;S.profEdit=false;S.confirm=null;break;
@@ -683,7 +684,11 @@ document.addEventListener('click',async ev=>{
    case'profToggle':S.profEdit=!S.profEdit;break;
    case'addMember':S.addMember=true;break;
    case'addCancel':S.addMember=false;break;
-   case'genRule':{if(S.routines[S.view]&&S.confirm!=='gen'){S.confirm='gen';break}S.confirm=null;const rt=genRule(P(S.view));await act('gn_save_routine',{p_member:S.view,p_data:rt},'새 루틴을 만들었어요');S.edit=null;break}
+   case'genRule':{const f=readProfForm();const prof=f?f.profile:P(S.view);
+     if(!prof.goal){toast('목표를 먼저 선택하세요.');document.getElementById('f_goal')?.focus();if(!f){S.profEdit=true}break}
+     if(S.routines[S.view]&&S.confirm!=='gen'){S.confirm='gen';break}S.confirm=null;
+     if(f&&!(await act('gn_save_member',{p_id:S.view,p_name:f.name,p_color:f.color,p_profile:f.profile})))break;
+     const rt=genRule(prof);if(await act('gn_save_routine',{p_member:S.view,p_data:rt},'새 루틴을 만들었어요. 아래에서 확인하세요')){S.profEdit=false;S.edit=null;render();setTimeout(()=>document.querySelector('[data-act="editStart"]')?.scrollIntoView({behavior:'smooth',block:'center'}),50);return}break}
    case'editStart':S.edit={member:S.view,rt:clone(S.routines[S.view])};break;
    case'editCancel':S.edit=null;break;
    case'editSave':if(await act('gn_save_routine',{p_member:S.edit.member,p_data:S.edit.rt},'루틴을 저장했어요'))S.edit=null;break;
@@ -691,7 +696,7 @@ document.addEventListener('click',async ev=>{
    case'addItem':{const di=+a.dataset.d;const id=$('#addsel_'+di).value;const p=P(S.view);const g=GOALS[p.goal]||GOALS['균형·체력'];const e=EX[id];
      S.edit.rt.days[di].items.push({ex:id,sets:g.sets,min:e.k==='time'?20:g.min,max:e.k==='time'?30:g.max,weight:estStart(id,p),rest:g.rest,est:true});break}
   }
-  render()});
+  render()}
 document.addEventListener('change',ev=>{const t=ev.target;const k=t.dataset.chk;if(!k)return;
   if(k==='warm'){S.session.warm=t.checked;saveDraft()}else if(k==='fin'){S.session.fin=t.checked;saveDraft()}
   else if(k==='ramp')S.edit.rt.ramp=t.checked;else if(k==='statEx'){S.statEx=t.value;render()}
@@ -703,6 +708,8 @@ document.addEventListener('input',ev=>{const t=ev.target;
   else if(t.dataset.in==='gq'){S.guideQ=t.value;render()}
   else if(t.dataset.ed){const it=S.edit.rt.days[+t.dataset.d].items[+t.dataset.i];const v=parseFloat(t.value);if(!isNaN(v)){it[t.dataset.ed]=t.dataset.ed==='weight'?v:Math.max(1,Math.round(v));delete it.est}}
   else if(t.id==='codeIn')S.login.code=t.value.replace(/\D/g,'')});
+function readProfForm(){const g=id=>(document.getElementById(id)?.value||'').trim();if(!document.getElementById('f_goal'))return null;const n=id=>{const x=parseFloat(g(id));return isNaN(x)?null:x};const m=M(S.view);
+  return{name:g('f_name')||m.name,color:g('f_color')||m.color,profile:{...(m.profile||{}),sex:g('f_sex'),age:n('f_age'),height:n('f_height'),weight:n('f_weight'),bodyFat:n('f_bf'),level:g('f_level'),goal:g('f_goal'),days:+g('f_days'),minutes:+g('f_min'),env:g('f_env'),notes:g('f_notes').slice(0,500)}}}
 document.addEventListener('submit',async ev=>{ev.preventDefault();const f=ev.target;const v=id=>($('#'+id)?.value||'').trim();const num=id=>{const n=parseFloat(v(id));return isNaN(n)?null:n};
   if(f.dataset.form==='code'){S.login.code=v('codeIn').replace(/\D/g,'');S.login.busy=true;S.login.err='';render();
     try{S.login.list=await api('gn_family_members',{p_code:S.login.code});S.login.step=2}catch(e){S.login.err=e.msg}S.login.busy=false;render()}
