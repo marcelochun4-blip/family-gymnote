@@ -267,7 +267,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.18-2222';
+const APP_VER='2026.10.18-2233';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -375,7 +375,7 @@ function ytLinks(id){const e=EX[id];const ko=e.n+' '+(['머신','케이블'].inc
 const S={token:lsGet('gn_token'),me:lsGet('gn_me'),view:null,members:{},routines:{},logs:[],cheers:[],loaded:false,
   tab:lsGet('gn_tab')||'home',meSeg:'ach',famMode:'day',famDate:today(),famWeek:dstr(monday(new Date())),
   session:null,timer:null,edit:null,profEdit:false,addMember:false,guideQ:'',guidePart:'전체',statEx:null,confirm:null,
-  lastProg:null,sheet:null,login:{step:1,code:'',list:null,busy:false,err:''},busy:false,openMsg:null};
+  lastProg:null,sheet:null,ai:{prompt:'',file:null,busy:false,err:'',preview:null,applyProf:true},login:{step:1,code:'',list:null,busy:false,err:''},busy:false,openMsg:null};
 
 function memberList(){return Object.values(S.members).sort((a,b)=>(a.ord??99)-(b.ord??99))}
 function M(id){return S.members[id]||null}
@@ -657,7 +657,8 @@ function vPlan(id){
   if(S.profEdit||!p.goal)h+=vProfForm(m);
   else h+=`<div class="row small">${[p.sex,p.age&&p.age+'세',p.height&&p.height+'cm',p.weight&&p.weight+'kg',p.bodyFat&&'체지방 '+p.bodyFat+'%',p.level,p.goal,'주 '+(p.days||3)+'회',(p.minutes||60)+'분',p.env].filter(Boolean).map(x=>`<span class="pill">${esc(x)}</span>`).join('')}</div>${p.notes?`<p class="small muted">${esc(p.notes)}</p>`:''}`;
   h+=`</section><section class="card"><h3>루틴 새로 만들기</h3><p class="small muted">나이·체중·수준·목표·주 횟수·시간·환경을 반영해 주간 루틴을 만들어요. 기존 루틴은 교체되고 기록은 그대로 남아요.</p>
-   <button class="btn pri wide" data-act="genRule" ${S.busy?'disabled':''}>${S.busy?'만드는 중…':S.confirm==='gen'?'기존 루틴을 바꿀까요? 한 번 더 누르기':'프로필로 루틴 생성'}</button>${!p.goal?'<p class="small muted">목표를 선택하면 바로 만들 수 있어요. 위 프로필 칸에 입력한 값은 이 버튼을 누를 때 함께 저장돼요.</p>':''}</section>`;
+   <button class="btn pri wide" data-act="genRule" ${S.busy?'disabled':''}>${S.busy?'만드는 중…':S.confirm==='gen'?'기존 루틴을 바꿀까요? 한 번 더 누르기':'빠른 생성 (프로필 기준)'}</button>${!p.goal?'<p class="small muted">목표를 선택하면 바로 만들 수 있어요. 위 프로필 칸에 입력한 값은 이 버튼을 누를 때 함께 저장돼요.</p>':''}</section>`;
+  h+=vAI(id);
   if(!rt)return h+`<div class="card"><div class="empty"><h3>루틴이 아직 없어요</h3><p>위 버튼으로 첫 루틴을 만드세요.</p></div></div>`;
   const editing=!!(S.edit&&S.edit.member===id);
   h+=`<section class="card"><div class="row between"><div><div class="lbl">${rt.source==='rule'?'자동 생성':'직접 구성'} · ${esc(rt.startDate||'')} 시작 · ${weekOf(rt)}주차</div><h2>${esc(rt.title)}</h2></div>${editing?`<div class="row"><button class="btn sm ghost" data-act="editCancel">취소</button><button class="btn sm pri" data-act="editSave">저장</button></div>`:`<button class="btn sm" data-act="editStart">편집</button>`}</div>
@@ -673,6 +674,47 @@ function vPlan(id){
     h+=`</section>`});
   if(!editing)h+=`<p class="small muted">운동을 저장하면 다음 회차 목표가 자동으로 바뀌어요. 모든 세트에서 최대 회수를 채우면 한 칸 증량, 절반 넘게 최소 회수에 못 미치면 한 칸 감량. '추정'은 아직 기록 전인 시작값이에요.</p>`;
   return h}
+function vAI(id){const A=S.ai;
+  let h=`<section class="card"><div><div class="lbl">AI 맞춤</div><h3>원하는 대로 루틴 만들기</h3></div>
+   <p class="small muted">하고 싶은 것, 피하고 싶은 것, 부상·통증을 자유롭게 쓰고 인바디 결과지 사진이나 PDF를 올리면 함께 반영해요.</p>
+   <form data-form="ai" class="fl" style="gap:10px"><textarea id="aiPrompt" data-in="aiPrompt" placeholder="예) 무릎이 안 좋아서 점프·깊은 스쿼트는 빼고, 상체 위주로 주 4회. 팔뚝 살 빼고 싶어요." ${A.busy?'disabled':''}>${esc(A.prompt)}</textarea>
+   <label class="btn" for="aiFile" style="text-align:center">${A.file?'📎 '+esc(A.file.name)+' ('+Math.round(A.file.size/1024)+'KB) · 바꾸기':'📎 인바디·검사지 사진 또는 PDF 올리기 (선택)'}</label>
+   <input id="aiFile" type="file" accept="image/*,application/pdf" hidden>
+   ${A.file?`<button type="button" class="btn sm ghost" data-act="aiClearFile" style="align-self:flex-start">첨부 빼기</button>`:''}
+   <button class="btn pri wide" type="submit" ${A.busy?'disabled':''}>${A.busy?'AI가 루틴을 설계하는 중… (20~40초)':'AI로 루틴 만들기'}</button></form>
+   ${A.err?`<p class="small" style="color:var(--bad)">${esc(A.err)}</p>`:''}</section>`;
+  const P0=A.preview;if(P0&&P0.member===id){const r=P0.rt,x=P0.extracted||{};
+    h+=`<section class="card hero"><div class="lbl">AI 제안 · 아직 저장 안 됨</div><h2>${esc(r.title)}</h2>${r.summary?`<p class="small">${esc(r.summary)}</p>`:''}
+    ${(x.weight||x.bodyFat||x.muscle||x.other)?`<div class="notice"><b>첨부에서 읽은 값</b><br>${[x.weight&&'체중 '+x.weight+'kg',x.bodyFat&&'체지방률 '+x.bodyFat+'%',x.muscle&&'골격근량 '+x.muscle+'kg'].filter(Boolean).join(' · ')}${x.other?'<br>'+esc(x.other):''}
+      ${(x.weight||x.bodyFat)?`<label class="row small" style="margin-top:6px"><input type="checkbox" id="aiApplyProf" data-chk="aiApplyProf" ${A.applyProf?'checked':''}> 이 값으로 프로필 체중·체지방률 업데이트</label>`:''}</div>`:''}
+    ${r.days.map(d=>`<div><b>${esc(d.key)}${d.dow?' · '+esc(d.dow)+'요일':''} · ${esc(d.title)}</b>${d.focus?`<div class="small muted">${esc(d.focus)}</div>`:''}${d.items.map(it=>`<div class="exline"><span>${esc(EX[it.ex].n)}</span><span class="num muted">${esc(targetText(it))}</span></div>`).join('')}</div>`).join('')}
+    ${r.notes?`<p class="small muted">${esc(r.notes)}</p>`:''}
+    <div class="grid2"><button class="btn" data-act="aiDiscard">버리기</button><button class="btn pri" data-act="aiSave">${S.routines[id]?'기존 루틴 대신 저장':'이 루틴으로 저장'}</button></div></section>`}
+  return h}
+function aiNormalize(r,p){
+  if(!r||!Array.isArray(r.days)||!r.days.length)throw new Error('형식 오류');
+  const days=r.days.slice(0,6).map((d,i)=>({key:String.fromCharCode(65+i),dow:DOW.includes(d.dow)?d.dow:undefined,title:String(d.title||`루틴 ${String.fromCharCode(65+i)}`).slice(0,40),focus:String(d.focus||'').slice(0,100),
+    warmup:String(d.warmup||'').slice(0,100),finisher:String(d.finisher||'').slice(0,100),
+    items:(Array.isArray(d.items)?d.items:[]).filter(x=>x&&EX[x.ex]).slice(0,9).map(x=>{const e=EX[x.ex];const min=Math.max(1,Math.round(+x.min||10)),max=Math.max(min,Math.round(+x.max||min));
+      return{ex:x.ex,sets:Math.min(6,Math.max(1,Math.round(+x.sets||3))),min,max,weight:['load','assist'].includes(e.k)?roundTo(Math.max(0,+x.weight||0),e.inc||1):0,rest:Math.min(240,Math.max(30,Math.round(+x.rest||90))),est:true}})})).filter(d=>d.items.length);
+  days.forEach(d=>{if(!d.dow)delete d.dow});
+  if(!days.length)throw new Error('운동 없음');
+  return{title:String(r.title||'AI 맞춤 루틴').slice(0,40),summary:String(r.summary||'').slice(0,400),notes:String(r.notes||'').slice(0,300),source:'ai',startDate:today(),ramp:(p.level||'초급')==='초급',days}}
+function fileToB64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(f)})}
+async function imageToJpeg(f){const url=URL.createObjectURL(f);try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+  const s=Math.min(1,1800/Math.max(img.naturalWidth,img.naturalHeight));const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*s);c.height=Math.round(img.naturalHeight*s);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);const d=c.toDataURL('image/jpeg',.85);return{type:'image/jpeg',data:d.split(',')[1],size:Math.round(d.length*.75)}}finally{URL.revokeObjectURL(url)}}
+async function runAI(){const A=S.ai,id=S.view;const f=readProfForm();const prof=f?f.profile:P(id);
+  if(f&&!(await act('gn_save_member',{p_id:id,p_name:f.name,p_color:f.color,p_profile:f.profile})))return;
+  A.busy=true;A.err='';render();
+  const lib=Object.entries(EX).map(([k,e])=>`${k}|${e.n}|${e.p}|${e.eq}|${e.k}${e.per?'|한손':''}`).join('\n');
+  const recent=logsOf(id).slice(0,5).map(l=>`${l.date} ${l.dayKey}: `+(l.entries||[]).map(en=>`${EX[en.ex]?.n||en.ex} ${en.sets.map(s=>fmtN(s.w)+'×'+s.r).join(',')}`).join(' / ')).join('; ');
+  try{const r=await fetch(`${SB_URL}/functions/v1/gn-ai-routine`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},
+      body:JSON.stringify({token:S.token,member:id,prompt:A.prompt,file:A.file?{name:A.file.name,type:A.file.type,data:A.file.data}:null,profile:prof,library:lib,recent})});
+    const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.message||'AI 요청이 실패했어요.');
+    A.preview={member:id,rt:aiNormalize(j.routine,prof),extracted:j.routine.extracted||{}};A.applyProf=true}
+  catch(e){A.err=e.message==='Failed to fetch'?'인터넷 연결을 확인해주세요.':(e.message||'AI 요청이 실패했어요.')}
+  A.busy=false;render();setTimeout(()=>document.querySelector('.card.hero .lbl')?.scrollIntoView({behavior:'smooth',block:'start'}),50)}
 function vProfForm(m){const p=m.profile||{};const opt=(arr,v)=>arr.map(x=>`<option ${x===v?'selected':''}>${x}</option>`).join('');
   return`<form class="prof" data-form="prof">
    <div class="fl"><label for="f_name">이름</label><input id="f_name" value="${esc(m.name||'')}" required></div>
@@ -725,6 +767,11 @@ async function onClick(ev){
      if(!(await act('gn_save_member',{p_id:S.me,p_name:m.name,p_color:m.color,p_profile:m.profile},'테마를 바꿨어요'))){m.profile.theme=prev}break}
    case'refresh':{a.classList.add('spin');const up=await checkUpdate(true);if(!up)await load();a.classList.remove('spin');return}
    case'doUpdate':if(S.session){toast('진행 중인 운동을 먼저 저장하거나 취소하세요');return}await hardReload(a.dataset.v);return;
+   case'aiClearFile':S.ai.file=null;break;
+   case'aiDiscard':S.ai.preview=null;break;
+   case'aiSave':{const P0=S.ai.preview;if(!P0)break;const x=P0.extracted||{};
+     if(S.ai.applyProf&&(x.weight||x.bodyFat)){const m=M(P0.member);const pr={...(m.profile||{})};if(+x.weight)pr.weight=+x.weight;if(+x.bodyFat)pr.bodyFat=+x.bodyFat;if(!(await act('gn_save_member',{p_id:P0.member,p_name:m.name,p_color:m.color,p_profile:pr})))break}
+     document.querySelectorAll('[data-dirty]').forEach(e=>delete e.dataset.dirty);const rt={...P0.rt};if(await act('gn_save_routine',{p_member:P0.member,p_data:rt},'AI 루틴을 저장했어요')){S.ai.preview=null;S.ai.prompt='';S.ai.file=null;S.edit=null}break}
    case'retry':S.loadErr=null;render();await load();return;
    case'loginBack':S.login={step:1,code:'',list:null,busy:false,err:''};break;
    case'logout':if(S.confirm!=='logout'){S.confirm='logout';break}try{await api('gn_logout',{p_token:S.token})}catch(e){}logoutLocal();lsSet('gn_sess',null);S.session=null;break;
@@ -768,15 +815,22 @@ async function onClick(ev){
      S.edit.rt.days[di].items.push({ex:id,sets:g.sets,min:e.k==='time'?20:g.min,max:e.k==='time'?30:g.max,weight:estStart(id,p),rest:g.rest,est:true});break}
   }
   render()}
-document.addEventListener('change',ev=>{const t=ev.target;if(t.closest&&t.closest('form'))t.dataset.dirty='1';const k=t.dataset.chk;if(!k)return;
+document.addEventListener('change',ev=>{const t=ev.target;if(t.type!=='file'&&t.closest&&t.closest('form'))t.dataset.dirty='1';const k=t.dataset.chk;if(!k)return;
   if(k==='warm'){S.session.warm=t.checked;saveDraft()}else if(k==='fin'){S.session.fin=t.checked;saveDraft()}
-  else if(k==='ramp')S.edit.rt.ramp=t.checked;else if(k==='statEx'){S.statEx=t.value;render()}
+  else if(k==='ramp')S.edit.rt.ramp=t.checked;else if(k==='aiApplyProf')S.ai.applyProf=t.checked;else if(k==='statEx'){S.statEx=t.value;render()}
   else if(k==='dow'){const d=S.edit.rt.days[+t.dataset.d];if(t.value)d.dow=t.value;else delete d.dow}});
+document.addEventListener('change',async ev=>{const t=ev.target;if(t.id!=='aiFile'||!t.files||!t.files[0])return;const f=t.files[0];
+  try{if(f.type==='application/pdf'){if(f.size>10*1024*1024){toast('PDF는 10MB 이하만 올릴 수 있어요.');return}S.ai.file={name:f.name,type:f.type,size:f.size,data:await fileToB64(f)}}
+    else if(f.type.startsWith('image/')||/\.(heic|heif)$/i.test(f.name)){const j=await imageToJpeg(f);S.ai.file={name:f.name,...j}}
+    else{toast('사진 또는 PDF만 올릴 수 있어요.');return}}
+  catch(e){toast('파일을 읽지 못했어요. 다른 사진으로 시도해주세요.');return}
+  render()});
 let draftT;
-document.addEventListener('input',ev=>{const t=ev.target;if(t.closest&&t.closest('form'))t.dataset.dirty='1';
+document.addEventListener('input',ev=>{const t=ev.target;if(t.type!=='file'&&t.closest&&t.closest('form'))t.dataset.dirty='1';
   if(t.dataset.in==='w'||t.dataset.in==='r'){S.session.entries[+t.dataset.e].sets[+t.dataset.s][t.dataset.in]=t.value.replace(/[^\d.]/g,'');clearTimeout(draftT);draftT=setTimeout(saveDraft,400)}
   else if(t.dataset.in==='note'){S.session.note=t.value;clearTimeout(draftT);draftT=setTimeout(saveDraft,400)}
   else if(t.dataset.in==='gq'){S.guideQ=t.value;render()}
+  else if(t.dataset.in==='aiPrompt'){S.ai.prompt=t.value}
   else if(t.dataset.ed){const it=S.edit.rt.days[+t.dataset.d].items[+t.dataset.i];const v=parseFloat(t.value);if(!isNaN(v)){it[t.dataset.ed]=t.dataset.ed==='weight'?v:Math.max(1,Math.round(v));delete it.est}}
   else if(t.id==='codeIn')S.login.code=t.value.replace(/\D/g,'')});
 function readProfForm(){const g=id=>(document.getElementById(id)?.value||'').trim();if(!document.getElementById('f_goal'))return null;const n=id=>{const x=parseFloat(g(id));return isNaN(x)?null:x};const m=M(S.view);
@@ -787,6 +841,7 @@ document.addEventListener('submit',async ev=>{ev.preventDefault();const f=ev.tar
   else if(f.dataset.form==='prof'){const m=M(S.view);const profile={...(m.profile||{}),sex:v('f_sex'),age:num('f_age'),height:num('f_height'),weight:num('f_weight'),bodyFat:num('f_bf'),level:v('f_level'),goal:v('f_goal'),days:+v('f_days'),minutes:+v('f_min'),env:v('f_env'),notes:v('f_notes').slice(0,500)};
     if(await act('gn_save_member',{p_id:S.view,p_name:v('f_name')||m.name,p_color:v('f_color'),p_profile:profile},'프로필을 저장했어요'))S.profEdit=false;render()}
   else if(f.dataset.form==='add'){const r=await act('gn_add_member',{p_name:v('a_name'),p_color:v('a_color')},'구성원을 추가했어요');if(r){S.addMember=false;S.view=r;S.meSeg='plan';S.profEdit=true}render()}
+  else if(f.dataset.form==='ai'){S.ai.prompt=($('#aiPrompt')?.value||'');if(!S.ai.prompt.trim()&&!S.ai.file){toast('원하는 내용을 쓰거나 파일을 올려주세요.');return}await runAI()}
   else if(f.dataset.form==='cheer'){const msg=v('cm_'+f.dataset.log);if(!msg)return;if(await act('gn_cheer',{p_log:f.dataset.log,p_emoji:'💬',p_msg:msg},'칭찬을 보냈어요'))S.openMsg=null;render()}});
 
 /* ---------- 자동 업데이트 ---------- */
