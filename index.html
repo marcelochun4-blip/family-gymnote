@@ -366,7 +366,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.21-0455';
+const APP_VER='2026.10.25-0806';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -814,6 +814,7 @@ function vSession(){
       <button class="check" data-act="setdone" data-e="${ei}" data-s="${si}" aria-pressed="${st.done}" aria-label="${si+1}세트 완료">✓</button></div>`});
     h+=`</div><div class="row"><button class="btn sm" data-act="addset" data-e="${ei}">+ 세트</button>${en.sets.length>1?`<button class="btn sm ghost" data-act="delset" data-e="${ei}">− 세트</button>`:''}${en.added&&!en.sets.some(x=>x.done)?`<button class="btn sm ghost" data-act="exDel" data-e="${ei}">운동 빼기</button>`:''}</div></section>`});
   h+=`<button class="btn wide" data-act="pickOpen" data-mode="add">+ 운동 추가</button>`;
+  if(pushSupported()&&!pushOn())h+=`<button class="btn ghost wide" data-act="pushOn">🔔 앱을 내려도 휴식 알림 받기</button>`;
   if(d?.finisher)h+=`<label class="card" style="flex-direction:row;align-items:center"><input type="checkbox" id="finChk" data-chk="fin" ${s.fin?'checked':''}><span><b>마무리</b> · ${esc(d.finisher)}</span></label>`;
   {const kg=kgOf(S.me);const done=s.entries.map(en=>({ex:en.ex,target:en.target,sets:en.sets.filter(x=>x.done)}));const sk=sessKcal(S.me,done,Math.round((Date.now()-s.t0)/6e4),d,s.warm,s.fin);const met=sk.met,mins=sk.min;const fac=kcalFactor(S.me);
    const base=+s.watch>0?Math.round(+s.watch):(sk.est!=null?Math.round(sk.est*fac):null);const acts=s.acts||[];const tot=(base||0)+acts.reduce((a,x)=>a+(x.kcal||0),0);
@@ -846,9 +847,31 @@ async function finishSession(){
   const ok=await act('gn_add_log',{p_date:s.date,p_data:data,p_routine:rt});
   if(!ok){render();return}
   const st1=streakOf(S.me);setTimeout(()=>celebrate(st0.todayDone?st0.streak:st0.streak,st1,st1.freezes>st0.freezes||(st1.total%FREEZE_EVERY===0&&st0.freezes===FREEZE_MAX?false:st1.freezes>st0.freezes)),250);
-  lsSet('gn_sess',null);S.session=null;S.timer=null;S.lastProg=changes;S.tab='me';S.meSeg='ach';S.view=S.me;lsSet('gn_tab','me');render();window.scrollTo(0,0)}
+  lsSet('gn_sess',null);S.session=null;S.timer=null;pushCancel();S.lastProg=changes;S.tab='me';S.meSeg='ach';S.view=S.me;lsSet('gn_tab','me');render();window.scrollTo(0,0)}
 
 let tick;
+/* 백그라운드 휴식 알림 (Web Push): 세트 완료 시 서버에 예약 → Supabase cron이 5초마다 확인해 푸시 발송 */
+const VAPID_PUB='BHnMG3t4Pb7EqCbnS2QSrWVTW9n5889IPcjcOvQfiZn44z5HOb5id0N52eYFDFPUsNsQiQdcFG8r-9WW2XKYR6U';
+function b64u(s){const b=atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(b,c=>c.charCodeAt(0))}
+const pushSupported=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+const pushOn=()=>lsGet('gn_push')===true&&pushSupported()&&Notification.permission==='granted';
+async function pushEnable(){
+  if(!pushSupported()){toast(isStandalone()?'이 기기는 웹 푸시를 지원하지 않아요 (iOS 16.4 이상 필요)':'홈 화면에 추가한 짐노트 앱에서만 켤 수 있어요');return}
+  let perm;try{perm=await Notification.requestPermission()}catch(e){perm='denied'}
+  if(perm!=='granted'){toast('알림이 허용되지 않았어요. 아이폰 설정 > 알림 > 짐노트에서 허용하세요.');return}
+  try{const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+    if(await act('gn_push_subscribe',{p_sub:sub.toJSON()},'백그라운드 알림을 켰어요'))lsSet('gn_push',true)}
+  catch(e){toast('알림 등록에 실패했어요. 앱을 닫았다 다시 열고 시도해주세요.')}}
+async function pushDisable(){try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();
+  if(sub){await api('gn_push_unsubscribe',{p_token:S.token,p_endpoint:sub.endpoint}).catch(()=>{});await sub.unsubscribe()}}catch(e){}lsSet('gn_push',false);toast('백그라운드 알림을 껐어요')}
+let pushT;
+function pushSchedule(sec){if(!pushOn()||!soundOn()||!S.token)return;clearTimeout(pushT);pushT=setTimeout(()=>{api('gn_push_schedule',{p_token:S.token,p_sec:Math.max(3,Math.round(sec))}).catch(()=>{})},300)}
+function pushCancel(){clearTimeout(pushT);if(!pushOn()||!S.token)return;api('gn_push_cancel',{p_token:S.token}).catch(()=>{})}
+function pushCard(){if(!pushSupported()&&!isStandalone())return'';const on=pushOn();
+  return`<section class="card"><div class="row between"><h3>백그라운드 휴식 알림</h3><span class="pill ${on?'good':''}">${on?'켜짐':'꺼짐'}</span></div>
+   <p class="small muted">앱을 내리거나 화면이 꺼져도 휴식이 끝나면 아이폰 알림으로 알려줘요. 앱을 보고 있을 땐 앱 안의 소리로 울려요. 이 기기에서 한 번만 켜면 돼요.</p>
+   ${pushSupported()?`<button class="btn ${on?'ghost':'pri'} wide" data-act="${on?'pushOff':'pushOn'}">${on?'끄기':'켜기 (알림 허용)'}</button>`:'<p class="small" style="color:var(--warn)">이 기기는 웹 푸시를 지원하지 않아요. iOS 16.4 이상, 홈 화면에 추가한 앱에서 열어주세요.</p>'}</section>`}
 /* 휴식 알림음: Web Audio. iOS는 사용자가 화면을 누를 때 소리가 풀리므로 클릭마다 unlock */
 let actx;const soundOn=()=>lsGet('gn_sound')!==false;
 function audioUnlock(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();
@@ -857,8 +880,9 @@ function tone(freq,at,dur,vol){if(!actx)return;const o=actx.createOscillator(),g
   g.gain.setValueAtTime(0.0001,at);g.gain.exponentialRampToValueAtTime(vol,at+.015);g.gain.exponentialRampToValueAtTime(0.0001,at+dur);o.connect(g);g.connect(actx.destination);o.start(at);o.stop(at+dur+.05)}
 function beepTick(){if(!soundOn()||!actx)return;try{if(actx.state==='suspended')actx.resume();tone(660,actx.currentTime,.12,.25)}catch(e){}}
 function beepEnd(){if(!soundOn()||!actx)return;try{if(actx.state==='suspended')actx.resume();const t=actx.currentTime;tone(880,t,.22,.55);tone(880,t+.3,.22,.55);tone(1320,t+.6,.45,.6)}catch(e){}}
-function startTimer(sec){S.timer={end:Date.now()+sec*1000,lastTick:null};clearInterval(tick);tick=setInterval(()=>{if(!S.timer){clearInterval(tick);return}
-  const left=Math.ceil((S.timer.end-Date.now())/1000);if(left>0&&left<=3&&S.timer.lastTick!==left){S.timer.lastTick=left;beepTick()}
+function startTimer(sec){S.timer={end:Date.now()+sec*1000,lastTick:null};pushSchedule(sec);clearInterval(tick);tick=setInterval(()=>{if(!S.timer){clearInterval(tick);return}
+  const late=Date.now()-S.timer.end;if(late>1500){S.timer=null;clearInterval(tick);renderTimer();return} // 백그라운드에서 돌아온 경우: 푸시가 이미 울렸으니 조용히 정리
+  const left=Math.ceil((S.timer.end-Date.now())/1000);if(left<=4&&!S.timer.pc&&document.visibilityState==='visible'){S.timer.pc=1;pushCancel()} // 앱을 보고 있으면 푸시 대신 앱 소리if(left>0&&left<=3&&S.timer.lastTick!==left){S.timer.lastTick=left;beepTick()}
   if(Date.now()>=S.timer.end){S.timer=null;clearInterval(tick);beepEnd();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}toast('휴식 끝, 다음 세트!')}renderTimer()},200);renderTimer()}
 function renderTimer(){const t=S.timer;if(!t||S.tab!=='work'){$('#timerSlot').innerHTML='';return}const left=Math.max(0,Math.ceil((t.end-Date.now())/1000));
   $('#timerSlot').innerHTML=`<div class="timer" role="timer"><span class="small">휴식</span><span class="num">${Math.floor(left/60)}:${pad(left%60)}</span><button data-act="tminus" aria-label="휴식 15초 줄이기">−15</button><button data-act="tplus" aria-label="휴식 15초 늘리기">+15</button><button data-act="tsnd" class="snd" aria-label="알림음 ${soundOn()?'끄기':'켜기'}">${soundOn()?'🔔':'🔕'}</button><button data-act="tskip">건너뛰기</button></div>`}
@@ -921,7 +945,7 @@ function vMe(){
   const vid=S.view||S.me;const m=M(vid);
   let h=`<div class="chips">${memberList().map(x=>`<button class="chip" data-act="view" data-id="${esc(x.id)}" aria-pressed="${x.id===vid}" style="--c:${colorVar(x)}"><span class="plate"></span>${esc(x.name)}${x.id===S.me?' (나)':''}</button>`).join('')}<button class="chip add" data-act="addMember">+ 구성원</button></div>`;
   if(S.addMember)return h+vAddMember();
-  if(vid===S.me){const cur=curSkin();h+=`<section class="card"><div class="row between"><h3>내 테마</h3><span class="small muted">나만 바뀌어요</span></div><div class="skins">${SKINS.map(t=>`<button class="skin" data-act="skin" data-s="${t.id}" aria-pressed="${cur===t.id}"><span class="sw" style="background:${t.bg};color:${t.fg};${t.font?`font-family:${t.font};font-weight:400`:''}">${t.name}<span class="row" style="gap:4px">${t.dots.map(d=>`<i style="background:${d}"></i>`).join('')}</span></span><span class="small muted">${t.desc}</span></button>`).join('')}</div></section>`}
+  if(vid===S.me){const cur=curSkin();h+=`<section class="card"><div class="row between"><h3>내 테마</h3><span class="small muted">나만 바뀌어요</span></div><div class="skins">${SKINS.map(t=>`<button class="skin" data-act="skin" data-s="${t.id}" aria-pressed="${cur===t.id}"><span class="sw" style="background:${t.bg};color:${t.fg};${t.font?`font-family:${t.font};font-weight:400`:''}">${t.name}<span class="row" style="gap:4px">${t.dots.map(d=>`<i style="background:${d}"></i>`).join('')}</span></span><span class="small muted">${t.desc}</span></button>`).join('')}</div></section>`+pushCard()}
   h+=`<div class="seg"><button data-act="meSeg" data-s="ach" aria-pressed="${S.meSeg==='ach'}">성취도</button><button data-act="meSeg" data-s="hist" aria-pressed="${S.meSeg==='hist'}">운동 기록</button><button data-act="meSeg" data-s="plan" aria-pressed="${S.meSeg==='plan'}">루틴·프로필</button></div>`;
   if(S.meSeg==='ach')h+=vAch(vid);else if(S.meSeg==='hist')h+=vHist(vid);else h+=vPlan(vid);
   if(vid===S.me)h+=`<p class="small muted" style="text-align:center">앱 버전 ${APP_VER}</p><div class="row" style="justify-content:center"><button class="btn sm ghost" data-act="logout">${S.confirm==='logout'?'정말 로그아웃':'이 기기에서 로그아웃'}</button></div>`;
@@ -1088,11 +1112,13 @@ async function onClick(ev){
    case'setdone':{const en=S.session.entries[+a.dataset.e];const st=en.sets[+a.dataset.s];st.done=!st.done;if(st.done){if(st.r==='')st.r=en.target.max;startTimer(en.target.rest||90)}saveDraft();break}
    case'addset':{const en=S.session.entries[+a.dataset.e];const last=en.sets[en.sets.length-1]||{w:en.target.weight};en.sets.push({w:last.w,r:'',done:false});saveDraft();break}
    case'delset':S.session.entries[+a.dataset.e].sets.pop();saveDraft();break;
-   case'cancelSess':if(S.confirm!=='sess'){S.confirm='sess';break}lsSet('gn_sess',null);S.session=null;S.timer=null;S.confirm=null;break;
+   case'cancelSess':if(S.confirm!=='sess'){S.confirm='sess';break}lsSet('gn_sess',null);S.session=null;S.timer=null;pushCancel();S.confirm=null;break;
    case'finish':a.disabled=true;await finishSession();return;
-   case'tplus':if(S.timer)S.timer.end+=15000;renderTimer();return;
-   case'tminus':if(S.timer){S.timer.end=Math.max(Date.now()+1000,S.timer.end-15000);S.timer.lastTick=null}renderTimer();return;
-   case'tsnd':lsSet('gn_sound',!soundOn());if(soundOn())beepTick();renderTimer();return;
+   case'tplus':if(S.timer){S.timer.end+=15000;S.timer.pc=0;pushSchedule((S.timer.end-Date.now())/1000)}renderTimer();return;
+   case'pushOn':await pushEnable();break;
+   case'pushOff':await pushDisable();break;
+   case'tminus':if(S.timer){S.timer.end=Math.max(Date.now()+1000,S.timer.end-15000);S.timer.lastTick=null;S.timer.pc=0;pushSchedule((S.timer.end-Date.now())/1000)}renderTimer();return;
+   case'tsnd':lsSet('gn_sound',!soundOn());if(soundOn()){beepTick();if(S.timer)pushSchedule((S.timer.end-Date.now())/1000)}else pushCancel();renderTimer();return;
    case'restAdj':{const en=S.session.entries[+a.dataset.e];en.target.rest=Math.min(300,Math.max(15,(+en.target.rest||90)+(+a.dataset.d)));saveDraft();break}
    case'pickOpen':S.sheet={type:'pick',mode:a.dataset.mode,e:a.dataset.e!=null?+a.dataset.e:null,persist:false};renderSheet();return;
    case'pickPart':S.sheet.part=a.dataset.p;renderSheet();return;
@@ -1102,7 +1128,7 @@ async function onClick(ev){
      else{const n=Math.max(2,Math.min(4,S.session.entries[0]?.sets.length||3));S.session.entries.push({ex:id,added:true,persist:!!sh.persist,target:{weight:w,min:(reps||[8,12])[0],max:(reps||[8,12])[1],rest:['time','bw'].includes(e.k)?60:90},sets:[...Array(n)].map(()=>({w,r:'',done:false}))});toast(`${e.n} 추가`)}
      S.sheet=null;saveDraft();renderSheet();break}
    case'exDel':S.session.entries.splice(+a.dataset.e,1);saveDraft();break;
-   case'tskip':S.timer=null;renderTimer();return;
+   case'tskip':S.timer=null;pushCancel();renderTimer();return;
    case'howto':S.sheet={type:'howto',ex:a.dataset.ex};renderSheet();return;
    case'closeSheet':case'closeSheetBg':S.sheet=null;renderSheet();return;
    case'gpart':S.guidePart=a.dataset.p;break;
