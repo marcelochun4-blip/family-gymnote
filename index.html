@@ -371,7 +371,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.26-0453';
+const APP_VER='2026.10.26-0537';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -724,6 +724,21 @@ const kcalTxt=k=>k?`${k.est?'약 ':''}${k.v.toLocaleString()}kcal`:'';
 function weekKcal(id,ms){return weekLogs(id,ms,true).reduce((a,l)=>a+(logKcal(l)?.v||0),0)}
 function actOptions(sel){return ACTS.map(([id,n])=>`<option value="${id}" ${id===sel?'selected':''}>${n}</option>`).join('')}
 
+/* 부위별 회복: 근력은 운동 부위 기준(코어 24h, 나머지 72h), 활동은 부위별 부하(추정치) × 강도·시간 */
+const ACT_LOAD={run:{하체:.6,코어:.15},jog:{하체:.5,코어:.15},ride:{하체:.5},mtb:{하체:.6,코어:.15},bike_l:{하체:.35},bike_m:{하체:.5},
+  walk:{하체:.25},walk_fast:{하체:.3},ellip:{하체:.4},rope:{하체:.45},golf:{코어:.4,어깨:.3,팔:.2},golf_range:{코어:.4,어깨:.3,팔:.2},
+  bball:{하체:.6,코어:.3,어깨:.3},bball_shoot:{하체:.3,어깨:.3},vball:{하체:.6,어깨:.5,코어:.3},soccer:{하체:.7,코어:.3},
+  tennis:{하체:.45,어깨:.4,팔:.3,코어:.2},badm:{하체:.45,어깨:.4,팔:.3,코어:.2},pickle:{하체:.45,어깨:.4,팔:.3,코어:.2}};
+const FULL_H=p=>p==='코어'?24:72;
+function logTime(l){const d=dstr(new Date(l.ts));if(d===l.date)return l.ts;return Math.min(l.ts,parseD(l.date).getTime()+19*36e5)} // 지난 날짜로 기록한 활동은 그날 저녁 기준
+function recoveryOf(id){const now=Date.now(),out={};
+  const hit=(p,t,hours,src)=>{const pct=Math.min(100,Math.round((now-t)/36e5/Math.max(6,hours)*100));if(pct<100&&(!out[p]||pct<out[p].pct))out[p]={pct,src}};
+  logsOf(id).forEach(l=>{const T=logTime(l);if(now-T>4*864e5)return;
+    const parts=new Set((l.entries||[]).map(en=>EX[en.ex]?.p).filter(p=>PARTS.includes(p)));parts.forEach(p=>hit(p,T,FULL_H(p),'근력'));
+    (l.acts||[]).forEach(a=>{const ld=ACT_LOAD[a.id];if(!ld)return;const inten=Math.min(1.2,Math.max(.3,((a.met||5)*(a.min||0))/300));
+      Object.entries(ld).forEach(([p,w])=>hit(p,T,FULL_H(p)*w*inten,a.n))})});
+  return out}
+
 function ach(id){
   const logs=logsOf(id).filter(l=>!isAct(l));const t=targetDays(id);const ms=monday(new Date());
   const wk=logs.filter(l=>parseD(l.date)>=ms).length;const weekPct=Math.min(100,Math.round(wk/t*100));
@@ -787,9 +802,9 @@ function vHome(){
   // 가족 순위
   const rank=memberList().map(m=>({m,a:ach(m.id)})).sort((x,y)=>y.a.score-x.a.score);
   h+=`<section class="card"><div class="row between"><h3>가족 이번 주</h3><button class="btn sm ghost" data-act="tab" data-tab="fam">피드 보기</button></div><div class="fam">${rank.map(({m,a})=>`<div class="famrow" style="--c:${colorVar(m)}"><span class="plate sm"></span><div><div class="row between small"><b>${esc(m.name)} <span class="flm">🔥${streakOf(m.id).streak}</span></b><span class="muted">${a.wk}/${a.t}회 · 성취도 ${a.score}</span></div><div class="meter"><i style="width:${a.weekPct}%"></i></div></div><span class="num">${a.weekPct}%</span></div>`).join('')}</div></section>`;
-  // 회복
-  const now=Date.now(),lastBy={};logsOf(S.me).forEach(l=>(l.entries||[]).forEach(en=>{const p=EX[en.ex]?.p;if(p&&(lastBy[p]==null||l.ts>lastBy[p]))lastBy[p]=l.ts}));
-  h+=`<section class="card"><div class="row between"><h3>부위별 회복</h3><span class="small muted">코어 24시간, 나머지 72시간 기준</span></div><div class="recov">${PARTS.map(p=>{const t=lastBy[p];const full=p==='코어'?24:72;const pct=t?Math.min(100,Math.round((now-t)/36e5/full*100)):100;const c=pct>=100?'var(--good)':pct>=60?'var(--warn)':'var(--bad)';return`<div><div class="row between small"><b>${p}</b><span class="num">${pct}%</span></div><div class="meter" style="--c:${c}"><i style="width:${pct}%"></i></div></div>`}).join('')}</div></section>`;
+  // 회복 (근력 + 유산소·활동)
+  const rec=recoveryOf(S.me);
+  h+=`<section class="card"><div class="row between"><h3>부위별 회복</h3><span class="small muted">근력 기준 코어 24시간·나머지 72시간, 활동은 강도·시간 반영</span></div><div class="recov">${PARTS.map(p=>{const r=rec[p];const pct=r?r.pct:100;const c=pct>=100?'var(--good)':pct>=60?'var(--warn)':'var(--bad)';return`<div><div class="row between small"><b>${p}${r&&pct<100?` <span class="muted" style="font-weight:400">· ${esc(r.src)}</span>`:''}</b><span class="num">${pct}%</span></div><div class="meter" style="--c:${c}"><i style="width:${pct}%"></i></div></div>`}).join('')}</div></section>`;
   return h}
 
 /* ---------- 운동 ---------- */
