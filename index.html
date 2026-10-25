@@ -197,6 +197,11 @@ form.prof .full{grid-column:1/-1}
 .fl{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fl label{font-size:12px;color:var(--muted);font-weight:600}
 .fl input,.fl select,.fl textarea{border:1px solid var(--line);background:var(--sunk);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+/* iOS Safari 날짜 입력: 고유 크기·가운데 정렬 무시하고 다른 칸과 같은 크기로 */
+.fl input[type=date]{-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box;max-width:100%;line-height:1.25;text-align:left}
+.fl input:not([type=checkbox]):not([type=file]),.fl select{height:46px}
+.fl input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0;min-height:1.25em}
+.fl input[type=date]::-webkit-calendar-picker-indicator{margin:0}
 .fl textarea{min-height:64px;resize:vertical}
 .editrow{display:grid;grid-template-columns:minmax(0,1fr) 48px 88px 64px 28px;gap:6px;align-items:center;font-size:13px}
 .editrow input{border:1px solid var(--line);background:var(--sunk);border-radius:6px;padding:6px 4px;width:100%;min-width:0;font-family:var(--f-num);font-weight:700;font-size:16px;text-align:center}
@@ -366,7 +371,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.26-0449';
+const APP_VER='2026.10.26-0453';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
