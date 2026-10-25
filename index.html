@@ -353,6 +353,10 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 .rest-adj{display:flex;align-items:center;gap:4px;margin-top:4px}.rest-adj .btn{padding:2px 8px;min-height:28px}.col-btns{display:flex;flex-direction:column;gap:6px}
 .picklist{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:52vh;overflow:auto}
 .timer .snd{opacity:.9}
+.plate.hasav{background-size:cover;background-position:center;box-shadow:0 0 0 2px var(--c)!important;border-radius:50%!important;width:30px;height:30px}
+.plate.sm.hasav{width:22px;height:22px}
+#whoBtn .plate.hasav{width:28px;height:28px}
+.avedit{display:flex;align-items:center;gap:14px}.avedit .big{width:72px;height:72px;border-radius:50%;background:var(--c) center/cover;box-shadow:0 0 0 3px var(--c);flex:none;display:grid;place-items:center;color:#fff;font-weight:800;font-size:22px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -371,7 +375,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.26-0537';
+const APP_VER='2026.10.26-0552';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -550,7 +554,7 @@ async function load(silent){
   try{const st=await api('gn_state',{p_token:S.token,p_days:400});
     const mem={};st.members.forEach(m=>mem[m.id]=m);S.members=mem;S.routines=st.routines||{};
     S.logs=(st.logs||[]).map(l=>({...(l.data||{}),id:l.id,member:l.member,date:l.date,ts:l.ts}));S.cheers=st.cheers||[];
-    S.me=st.me;lsSet('gn_me',S.me);try{S.aiReqs=await api('gn_ai_requests_list',{p_token:S.token})||[]}catch(e){S.aiReqs=S.aiReqs||[]}if(!S.view||!mem[S.view])S.view=S.me;S.loaded=true;
+    S.me=st.me;lsSet('gn_me',S.me);avSync().then(()=>{if(document.querySelector('.plate.hasav'))avStyleSync()});try{S.aiReqs=await api('gn_ai_requests_list',{p_token:S.token})||[]}catch(e){S.aiReqs=S.aiReqs||[]}if(!S.view||!mem[S.view])S.view=S.me;S.loaded=true;
     const busyForm=document.querySelector('#main [data-dirty]')||document.querySelector('#main form.prof')||S.edit||S.openMsg;
     if(!(silent&&((S.tab==='work'&&S.session)||busyForm)))render()}
   catch(e){if(!silent||e.auth)toast(e.msg);if(e.auth||!S.loaded){S.loadErr=e.msg;render()}}}
@@ -753,6 +757,18 @@ function ach(id){
   const badges=[['첫','첫 운동',logs.length>=1],['10','10회 출석',logs.length>=10],['30','30회 출석',logs.length>=30],['목','주간 목표 달성',streak>=1||wk>=t],['3주','3주 연속 달성',streak>=3],['PR','첫 기록 경신',allPr>=1],['PR5','기록 경신 5회',allPr>=5],['👏','칭찬 10개 받음',cheersIn>=10],['1만','누적 1만kg',vol>=10000],['🔥7','7일 스트릭',streakOf(id).best>=7],['🔥30','30일 스트릭',streakOf(id).best>=30],['🔥100','100일 스트릭',streakOf(id).best>=100]];
   return{wk,t,weekPct,attend,completion,streak,prs,allPr,cheersIn,vol,score,total:logs.length,badges}}
 
+/* ---------- 프로필 사진 ---------- */
+const cid=id=>String(id||'').replace(/[^a-zA-Z0-9_-]/g,'');
+const avCls=m=>m&&m.av?` hasav av-${cid(m.id)}`:'';
+function avStyleSync(){const cache=lsGet('gn_av')||{};let css='';memberList().forEach(m=>{const c=cache[m.id];if(m.av&&c&&c.v===m.av&&c.data)css+=`.plate.av-${cid(m.id)}{background-image:url("${c.data}")}`});
+  let el=document.getElementById('avStyle');if(!el){el=document.createElement('style');el.id='avStyle';document.head.appendChild(el)}if(el.textContent!==css)el.textContent=css}
+async function avSync(){const cache=lsGet('gn_av')||{};const need=memberList().some(m=>m.av&&(!cache[m.id]||cache[m.id].v!==m.av));
+  if(need){try{const r=await api('gn_avatars_get',{p_token:S.token})||{};const nc={};Object.entries(r).forEach(([id,x])=>{if(x&&x.data)nc[id]={v:x.v,data:x.data}});lsSet('gn_av',nc)}catch(e){}}
+  avStyleSync()}
+async function avatarFromFile(f){const url=URL.createObjectURL(f);try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
+  const s=Math.min(img.naturalWidth,img.naturalHeight),N=256,c=document.createElement('canvas');c.width=N;c.height=N;
+  c.getContext('2d').drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,N,N);return c.toDataURL('image/jpeg',.82)}finally{URL.revokeObjectURL(url)}}
+
 /* ---------- 렌더 ---------- */
 const ICON={home:'<path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z"/>',work:'<path d="M2 10h3v4H2zM19 10h3v4h-3zM5 7h3v10H5zM16 7h3v10h-3zM8 11h8v2H8z"/>',
  fam:'<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14 20c0-2.5 1.3-4.5 3-4.5s4 1.5 4 4.5"/>',
@@ -765,7 +781,7 @@ function render(){
   $('#top').hidden=false;$('#tabbar').hidden=false;
   const me=M(S.me);const tint=S.tab==='me'?M(S.view):me;
   applySkin(colorVar(tint));
-  $('#whoBtn').innerHTML=`<span class="plate" style="--c:${colorVar(me)}"></span><b>${esc(me?.name||'')}</b>`;
+  $('#whoBtn').innerHTML=`<span class="plate${avCls(me)}" style="--c:${colorVar(me)}"></span><b>${esc(me?.name||'')}</b>`;
   const un=unseenCheers().length;
   $('#tabs').innerHTML=TABS.map(([k,l])=>`<button data-act="tab" data-tab="${k}" ${S.tab===k?'aria-current="page"':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${ICON[k]}</svg>${l}${k==='home'&&un?`<span class="dot">${un}</span>`:''}</button>`).join('');
   const ae=document.activeElement;const keep=ae&&ae.id&&main.contains(ae)?{id:ae.id,s:ae.selectionStart,e:ae.selectionEnd}:null;
@@ -798,10 +814,10 @@ function vHome(){
   h+=`</section>`+streakCard(S.me);
   const recv=S.cheers.filter(c=>c.to===S.me).slice(-6).reverse();const un=unseenCheers();
   if(recv.length)h+=`<section class="card"><div class="row between"><h3>받은 칭찬${un.length?` <span class="pill bad">새 ${un.length}</span>`:''}</h3>${un.length?`<button class="btn sm ghost" data-act="seenCheers">모두 확인</button>`:''}</div>
-   <div class="fam">${recv.map(c=>{const f=M(c.from);const l=S.logs.find(x=>x.id===c.log);return`<div class="famrow" style="--c:${colorVar(f)}"><span class="plate sm"></span><div class="small"><b>${esc(f?.name||'')}</b> ${esc(c.emoji)} ${c.msg?esc(c.msg):''}<div class="muted">${l?md(l.date)+' '+esc(l.dayTitle||''):''}</div></div><span></span></div>`}).join('')}</div></section>`;
+   <div class="fam">${recv.map(c=>{const f=M(c.from);const l=S.logs.find(x=>x.id===c.log);return`<div class="famrow" style="--c:${colorVar(f)}"><span class="plate sm${avCls(f)}"></span><div class="small"><b>${esc(f?.name||'')}</b> ${esc(c.emoji)} ${c.msg?esc(c.msg):''}<div class="muted">${l?md(l.date)+' '+esc(l.dayTitle||''):''}</div></div><span></span></div>`}).join('')}</div></section>`;
   // 가족 순위
   const rank=memberList().map(m=>({m,a:ach(m.id)})).sort((x,y)=>y.a.score-x.a.score);
-  h+=`<section class="card"><div class="row between"><h3>가족 이번 주</h3><button class="btn sm ghost" data-act="tab" data-tab="fam">피드 보기</button></div><div class="fam">${rank.map(({m,a})=>`<div class="famrow" style="--c:${colorVar(m)}"><span class="plate sm"></span><div><div class="row between small"><b>${esc(m.name)} <span class="flm">🔥${streakOf(m.id).streak}</span></b><span class="muted">${a.wk}/${a.t}회 · 성취도 ${a.score}</span></div><div class="meter"><i style="width:${a.weekPct}%"></i></div></div><span class="num">${a.weekPct}%</span></div>`).join('')}</div></section>`;
+  h+=`<section class="card"><div class="row between"><h3>가족 이번 주</h3><button class="btn sm ghost" data-act="tab" data-tab="fam">피드 보기</button></div><div class="fam">${rank.map(({m,a})=>`<div class="famrow" style="--c:${colorVar(m)}"><span class="plate sm${avCls(m)}"></span><div><div class="row between small"><b>${esc(m.name)} <span class="flm">🔥${streakOf(m.id).streak}</span></b><span class="muted">${a.wk}/${a.t}회 · 성취도 ${a.score}</span></div><div class="meter"><i style="width:${a.weekPct}%"></i></div></div><span class="num">${a.weekPct}%</span></div>`).join('')}</div></section>`;
   // 회복 (근력 + 유산소·활동)
   const rec=recoveryOf(S.me);
   h+=`<section class="card"><div class="row between"><h3>부위별 회복</h3><span class="small muted">근력 기준 코어 24시간·나머지 72시간, 활동은 강도·시간 반영</span></div><div class="recov">${PARTS.map(p=>{const r=rec[p];const pct=r?r.pct:100;const c=pct>=100?'var(--good)':pct>=60?'var(--warn)':'var(--bad)';return`<div><div class="row between small"><b>${p}${r&&pct<100?` <span class="muted" style="font-weight:400">· ${esc(r.src)}</span>`:''}</b><span class="num">${pct}%</span></div><div class="meter" style="--c:${c}"><i style="width:${pct}%"></i></div></div>`}).join('')}</div></section>`;
@@ -925,7 +941,7 @@ function postCard(l){
   const byEmoji={};cs.forEach(c=>{(byEmoji[c.emoji]=byEmoji[c.emoji]||[]).push(c)});const msgs=cs.filter(c=>c.msg);
   const summary=(l.entries||[]).map(en=>{const e=EX[en.ex];if(!e)return'';const top=['load','assist'].includes(e.k)?Math.max(...en.sets.map(s=>+s.w||0)):null;return`${esc(e.n)} ${en.sets.length}세트${top!=null&&e.k==='load'?' · '+fmtN(top)+'kg':''}`}).join(', ');
   const prs=prsOf(l.member,l.ts).filter(p=>p.date===l.date);
-  return`<article class="post" style="--c:${colorVar(m)}"><div class="row between"><div class="who2"><span class="plate"></span><div><b>${esc(m?.name||'')}</b><div class="small muted">${md(l.date)} · ${esc(l.dayKey||'')} ${esc(l.dayTitle||'')}</div></div></div><span class="small muted"><span class="num">${l.durationMin||0}</span>분${isAct(l)?'':` · <span class="num">${(l.volume||0).toLocaleString()}</span>kg`}</span></div>
+  return`<article class="post" style="--c:${colorVar(m)}"><div class="row between"><div class="who2"><span class="plate${avCls(m)}"></span><div><b>${esc(m?.name||'')}</b><div class="small muted">${md(l.date)} · ${esc(l.dayKey||'')} ${esc(l.dayTitle||'')}</div></div></div><span class="small muted"><span class="num">${l.durationMin||0}</span>분${isAct(l)?'':` · <span class="num">${(l.volume||0).toLocaleString()}</span>kg`}</span></div>
    ${prs.length?`<div class="row">${prs.map(p=>`<span class="pill good">기록 경신 ${esc(EX[p.ex].n)} ${fmtN(p.prev)}→${fmtN(p.w)}kg</span>`).join('')}</div>`:''}
    <div class="small">${summary}${(l.acts||[]).length?`${summary?'<br>':''}${l.acts.map(actTxt).join(', ')}`:''}</div>${(()=>{const k=logKcal(l);return k?`<div><span class="pill warn">🔥 ${kcalTxt(k)}</span></div>`:''})()}${l.note?`<div class="msg">${esc(l.note)}</div>`:''}
    <div class="reacts">${REACTS.map(r=>{const list=byEmoji[r]||[];const mineR=list.find(c=>c.from===S.me);return`<button class="react" ${mine?'disabled':''} data-act="${mineR?'unreact':'react'}" data-log="${l.id}" data-e="${r}" ${mineR?`data-id="${mineR.id}"`:''} aria-pressed="${!!mineR}">${r}${list.length?`<span class="num">${list.length}</span>`:''}</button>`}).join('')}
@@ -938,13 +954,13 @@ function vFam(){
   if(S.famMode==='day'){const d=S.famDate;const isT=d===today();
     h+=`<div class="row between"><button class="btn sm" data-act="famPrev">‹ 전날</button><h2>${isT?'오늘 ':''}${md(d)}</h2><button class="btn sm" data-act="famNext" ${isT?'disabled':''}>다음날 ›</button></div>`;
     memberList().forEach(m=>{const ls=S.logs.filter(l=>l.member===m.id&&l.date===d);
-      if(ls.length)ls.forEach(l=>h+=postCard(l));else h+=`<div class="restday" style="--c:${colorVar(m)}"><span class="plate sm"></span><b>${esc(m.name)}</b> 기록 없음</div>`})}
+      if(ls.length)ls.forEach(l=>h+=postCard(l));else h+=`<div class="restday" style="--c:${colorVar(m)}"><span class="plate sm${avCls(m)}"></span><b>${esc(m.name)}</b> 기록 없음</div>`})}
   else if(S.famMode==='week'){const ms=parseD(S.famWeek);const me=addDays(ms,6);const isCur=dstr(ms)===dstr(monday(new Date()));
     h+=`<div class="row between"><button class="btn sm" data-act="wkPrev">‹ 지난주</button><h2>${md(dstr(ms))} ~ ${md(dstr(me))}</h2><button class="btn sm" data-act="wkNext" ${isCur?'disabled':''}>다음주 ›</button></div>`;
     h+=`<section class="card"><div style="overflow-x:auto"><div class="wtable"><span></span>${[...Array(7)].map((_,i)=>`<span class="h">${DOW[addDays(ms,i).getDay()]}</span>`).join('')}<span class="h">합계</span>
      ${memberList().map(m=>{const wl=weekLogs(m.id,ms);const wa=weekLogs(m.id,ms,true);return`<b class="small">${esc(m.name)}</b>${[...Array(7)].map((_,i)=>{const s=dstr(addDays(ms,i));const l=wl.find(x=>x.date===s)||wa.find(x=>x.date===s);return`<span class="c ${l?'on':''}" style="--c:${colorVar(m)}">${l?esc(isAct(l)?'+':(l.dayKey||'✓')):''}</span>`}).join('')}<span class="num" style="text-align:center">${wl.length}/${targetDays(m.id)}</span>`}).join('')}</div></div></section>`;
     h+=`<section class="card"><h3>주간 요약</h3><div class="fam">${memberList().map(m=>{const wl=weekLogs(m.id,ms);const vol=wl.reduce((a,l)=>a+(l.volume||0),0);const mins=weekLogs(m.id,ms,true).reduce((a,l)=>a+(l.durationMin||0),0);const kc=weekKcal(m.id,ms);const pct=Math.min(100,Math.round(wl.length/targetDays(m.id)*100));const cin=S.cheers.filter(c=>c.to===m.id&&wl.some(l=>l.id===c.log)).length;
-      return`<div class="famrow" style="--c:${colorVar(m)}"><span class="plate sm"></span><div><div class="row between small"><b>${esc(m.name)}</b><span class="muted">${mins}분 · ${vol.toLocaleString()}kg${kc?` · ${kc.toLocaleString()}kcal`:''} · 칭찬 ${cin}</span></div><div class="meter"><i style="width:${pct}%"></i></div></div><span class="num">${pct}%</span></div>`}).join('')}</div></section>`;
+      return`<div class="famrow" style="--c:${colorVar(m)}"><span class="plate sm${avCls(m)}"></span><div><div class="row between small"><b>${esc(m.name)}</b><span class="muted">${mins}분 · ${vol.toLocaleString()}kg${kc?` · ${kc.toLocaleString()}kcal`:''} · 칭찬 ${cin}</span></div><div class="meter"><i style="width:${pct}%"></i></div></div><span class="num">${pct}%</span></div>`}).join('')}</div></section>`;
     const wl=S.logs.filter(l=>parseD(l.date)>=ms&&parseD(l.date)<=me);h+=wl.length?wl.map(postCard).join(''):`<div class="empty">이 주에는 기록이 없어요.</div>`}
   else{const ls=S.logs.slice(0,40);h+=ls.length?ls.map(postCard).join(''):`<div class="card"><div class="empty"><h3>아직 가족 기록이 없어요</h3><p>누군가 운동을 저장하면 여기에 올라와요.</p></div></div>`}
   return h}
@@ -975,7 +991,7 @@ function renderSheet(){const s=S.sheet;if(!s){$('#sheetSlot').innerHTML='';docum
 /* ---------- 기록(성취·히스토리·루틴) ---------- */
 function vMe(){
   const vid=S.view||S.me;const m=M(vid);
-  let h=`<div class="chips">${memberList().map(x=>`<button class="chip" data-act="view" data-id="${esc(x.id)}" aria-pressed="${x.id===vid}" style="--c:${colorVar(x)}"><span class="plate"></span>${esc(x.name)}${x.id===S.me?' (나)':''}</button>`).join('')}<button class="chip add" data-act="addMember">+ 구성원</button></div>`;
+  let h=`<div class="chips">${memberList().map(x=>`<button class="chip" data-act="view" data-id="${esc(x.id)}" aria-pressed="${x.id===vid}" style="--c:${colorVar(x)}"><span class="plate${avCls(x)}"></span>${esc(x.name)}${x.id===S.me?' (나)':''}</button>`).join('')}<button class="chip add" data-act="addMember">+ 구성원</button></div>`;
   if(S.addMember)return h+vAddMember();
   if(vid===S.me){const cur=curSkin();h+=`<section class="card"><div class="row between"><h3>내 테마</h3><span class="small muted">나만 바뀌어요</span></div><div class="skins">${SKINS.map(t=>`<button class="skin" data-act="skin" data-s="${t.id}" aria-pressed="${cur===t.id}"><span class="sw" style="background:${t.bg};color:${t.fg};${t.font?`font-family:${t.font};font-weight:400`:''}">${t.name}<span class="row" style="gap:4px">${t.dots.map(d=>`<i style="background:${d}"></i>`).join('')}</span></span><span class="small muted">${t.desc}</span></button>`).join('')}</div></section>`+pushCard()}
   h+=`<div class="seg"><button data-act="meSeg" data-s="ach" aria-pressed="${S.meSeg==='ach'}">성취도</button><button data-act="meSeg" data-s="hist" aria-pressed="${S.meSeg==='hist'}">운동 기록</button><button data-act="meSeg" data-s="plan" aria-pressed="${S.meSeg==='plan'}">루틴·프로필</button></div>`;
@@ -1015,7 +1031,10 @@ function vHist(id){const logs=logsOf(id);
   return h+`</section>`}
 function vPlan(id){
   const m=M(id),p=m.profile||{},rt=S.edit&&S.edit.member===id?S.edit.rt:S.routines[id];
-  let h=`<section class="card"><div class="row between"><h2>${esc(m.name)} 프로필</h2><button class="btn sm" data-act="profToggle">${S.profEdit?'닫기':'수정'}</button></div>`;
+  const avc=(lsGet('gn_av')||{})[id];const avd=m.av&&avc&&avc.v===m.av?avc.data:null;
+  let h=`<section class="card"><div class="row between"><h2>${esc(m.name)} 프로필</h2><button class="btn sm" data-act="profToggle">${S.profEdit?'닫기':'수정'}</button></div>
+   <div class="avedit" style="--c:${colorVar(m)}"><span class="big" ${avd?`style="background-image:url('${avd}')"`:''}>${avd?'':esc((m.name||'?').length>=3?m.name.slice(-2):(m.name||'?'))}</span>
+    <div class="row" style="gap:8px"><label class="btn sm" for="avFile" style="cursor:pointer">${avd?'사진 바꾸기':'사진 올리기'}</label><input type="file" id="avFile" accept="image/*" hidden data-member="${esc(id)}">${avd?`<button class="btn sm ghost" data-act="avDel" data-id="${esc(id)}">${S.confirm==='av'+id?'정말 삭제':'삭제'}</button>`:''}</div></div>`;
   if(S.profEdit||!p.goal)h+=vProfForm(m);
   else h+=`<div class="row small">${[p.sex,p.age&&p.age+'세',p.height&&p.height+'cm',p.weight&&p.weight+'kg',p.bodyFat&&'체지방 '+p.bodyFat+'%',p.level,p.goal,'주 '+(p.days||3)+'회',(p.minutes||60)+'분',p.env].filter(Boolean).map(x=>`<span class="pill">${esc(x)}</span>`).join('')}</div>${p.notes?`<p class="small muted">${esc(p.notes)}</p>`:''}`;
   h+=`</section><section class="card"><h3>루틴 새로 만들기</h3><p class="small muted">나이·체중·수준·목표·주 횟수·시간·환경을 반영해 주간 루틴을 만들어요. 기존 루틴은 교체되고 기록은 그대로 남아요.</p>
@@ -1132,6 +1151,7 @@ async function onClick(ev){
    case'doUpdate':if(S.session){toast('진행 중인 운동을 먼저 저장하거나 취소하세요');return}await hardReload(a.dataset.v);return;
    case'aiClearFile':S.ai.file=null;break;
    case'actForm':S.actForm=!S.actForm;break;
+   case'avDel':{const id=a.dataset.id;if(S.confirm!=='av'+id){S.confirm='av'+id;break}S.confirm=null;if(await act('gn_set_avatar',{p_member:id,p_data:null},'사진을 지웠어요')){const c=lsGet('gn_av')||{};delete c[id];lsSet('gn_av',c);avStyleSync()}break}
    case'actQuick':S.actForm=true;S.tab='work';lsSet('gn_tab','work');window.scrollTo(0,0);break;
    case'sessActDel':S.session.acts.splice(+a.dataset.i,1);saveDraft();break;
    case'aiDiscard':if(a.dataset.req)await act('gn_ai_request_close',{p_id:a.dataset.req,p_status:'dismissed'});S.ai.preview=null;break;
@@ -1199,6 +1219,10 @@ document.addEventListener('change',ev=>{const t=ev.target;if(t.type!=='file'&&t.
   else if(k==='pickPersist'){if(S.sheet)S.sheet.persist=t.checked}
   else if(k==='ramp')S.edit.rt.ramp=t.checked;else if(k==='aiApplyProf')S.ai.applyProf=t.checked;else if(k==='statEx'){S.statEx=t.value;render()}
   else if(k==='dow'){const d=S.edit.rt.days[+t.dataset.d];if(t.value)d.dow=t.value;else delete d.dow}});
+document.addEventListener('change',async ev=>{const t=ev.target;if(t.id!=='avFile'||!t.files||!t.files[0])return;
+  try{const data=await avatarFromFile(t.files[0]);const id=t.dataset.member;const v=await act('gn_set_avatar',{p_member:id,p_data:data},'사진을 올렸어요');
+    if(v){const c=lsGet('gn_av')||{};c[id]={v:+v,data};lsSet('gn_av',c);avStyleSync();render()}}
+  catch(e){toast('사진을 읽지 못했어요. 다른 사진으로 시도해주세요.')}t.value=''});
 document.addEventListener('change',async ev=>{const t=ev.target;if(t.id!=='aiFile'||!t.files||!t.files[0])return;const f=t.files[0];
   try{if(f.type==='application/pdf'){if(f.size>2.8*1024*1024){toast('PDF는 2.8MB 이하만 올릴 수 있어요. 사진으로 찍어 올려도 돼요.');return}S.ai.file={name:f.name,type:f.type,size:f.size,data:await fileToB64(f)}}
     else if(f.type.startsWith('image/')||/\.(heic|heif)$/i.test(f.name)){const j=await imageToJpeg(f);S.ai.file={name:f.name,...j}}
