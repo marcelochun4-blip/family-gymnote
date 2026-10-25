@@ -366,7 +366,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.25-0806';
+const APP_VER='2026.10.26-0449';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -658,8 +658,9 @@ function celebrate(prev,cur,earnedFreeze){
    MET 출처: 2024 Adult Compendium of Physical Activities (pacompendium.com), 괄호 안은 코드.
    활동 칼로리 = (MET - 1) × 체중kg × 시간h  → 안정 시 대사(1 MET)를 뺀 값이라 애플워치 '활동 칼로리'와 같은 개념 */
 const ACTS=[
- ['walk','걷기 (시속 4.8km)',3.8,'17355'],['walk_fast','빠르게 걷기 (시속 5.6km)',4.8,'17358'],
- ['jog','조깅 (편한 속도)',7.5,'12020'],['run','달리기 (시속 9.7km)',9.3,'12050'],
+ ['run','러닝',9.3,'12050'],['jog','조깅 (편한 속도)',7.5,'12020'],
+ ['ride','자전거 라이딩 (야외)',7.0,'01014'],['mtb','산악자전거',8.5,'01009'],
+ ['walk','걷기',3.8,'17355'],['walk_fast','빠르게 걷기',4.8,'17358'],
  ['bike_l','실내자전거 가볍게 (50W)',4.0,'01214'],['bike_m','실내자전거 보통 (90~100W)',6.0,'01220'],
  ['ellip','일립티컬 보통',5.0,'02048'],['rope','줄넘기',11.0,'02068'],
  ['golf','골프 라운딩',4.5,'15255'],['golf_range','골프 연습장',3.5,'15270'],
@@ -694,8 +695,18 @@ function kcalFactor(member){const r=logsOf(member).map(l=>l.kcal).filter(k=>k&&k
   if(r.length<2)return 1;const m=r.length%2?r[(r.length-1)/2]:(r[r.length/2-1]+r[r.length/2])/2;return Math.min(1.6,Math.max(.7,Math.round(m*100)/100))}
 const kcalOf=(met,kg,min)=>(met>0&&kg>0&&min>0)?Math.round((met-1)*kg*min/60):null;
 function kgOf(id){return +P(id).weight||null}
-function actEntry(id,min,kg,watch,name){const a=ACT[id]||ACT.custom;min=Math.max(0,Math.round(+min||0));const w=+watch>0?Math.round(+watch):null;
-  return{id:a.id,n:(a.id==='custom'&&name)?String(name).slice(0,30):a.n.replace(/ \(.*\)$/,''),min,met:a.met||null,kcal:w??(a.met?kcalOf(a.met,kg,min):null),src:w!=null?'watch':(a.met?'est':null)}}
+// 거리를 넣으면 속도(km/h)로 MET 결정. [하한속도, MET, 코드]  (2024 Compendium)
+const SPEED_MET={
+  run:[[0,6.0,'12010'],[6.4,6.5,'12028'],[6.9,7.8,'12029'],[8.0,8.5,'12030'],[8.9,9.0,'12045'],[9.7,9.3,'12050'],[10.8,10.5,'12060'],[11.3,11.0,'12070'],[12.1,11.8,'12080'],[12.9,12.0,'12090'],[13.8,12.5,'12100'],[14.5,13.0,'12110'],[15.0,14.8,'12115'],[17.7,16.8,'12130'],[19.3,18.5,'12132']],
+  ride:[[0,4.0,'01010'],[16.1,6.8,'01020'],[19.3,8.0,'01030'],[22.5,10.0,'01040'],[25.7,12.0,'01050'],[32.2,16.8,'01060']],
+  walk:[[0,3.5,'17352'],[4.8,3.8,'17355'],[5.6,4.8,'17358'],[6.4,5.8,'17361']]};
+const SPEED_KIND={run:'run',jog:'run',ride:'ride',walk:'walk',walk_fast:'walk'};
+const usesDist=id=>!!SPEED_KIND[id];
+function metBySpeed(id,kmh){const t=SPEED_MET[SPEED_KIND[id]];if(!t||!(kmh>0))return null;let r=t[0];for(const x of t)if(kmh>=x[0])r=x;return r[1]}
+function actEntry(id,min,kg,watch,name,dist){const a=ACT[id]||ACT.custom;min=Math.max(0,Math.round(+min||0));const w=+watch>0?Math.round(+watch):null;
+  const km=usesDist(a.id)&&+dist>0?Math.round(+dist*100)/100:null;const kmh=km&&min?Math.round(km/(min/60)*10)/10:null;const met=(kmh&&metBySpeed(a.id,kmh))||a.met||null;
+  return{id:a.id,n:(a.id==='custom'&&name)?String(name).slice(0,30):a.n.replace(/ \(.*\)$/,''),min,km,kmh,met,kcal:w??(met?kcalOf(met,kg,min):null),src:w!=null?'watch':(met?'est':null)}}
+const actTxt=a=>`${esc(a.n)}${a.km?` ${fmtN(a.km)}km`:''} ${a.min}분${a.kmh?` (${fmtN(a.kmh)}km/h)`:''}`;
 // 로그 하나의 활동 칼로리. 예전 기록(칼로리 저장 전)은 현재 체중으로 다시 계산
 function logKcal(l){let est=false,total=0,known=false;
   if(!isAct(l)&&(l.entries||[]).length){const k=l.kcal||{};let v=k.watch;
@@ -763,6 +774,7 @@ function vHome(){
   if(S.session)h+=`<button class="btn pri wide" data-act="tab" data-tab="work">진행 중인 운동 이어하기</button>`;
   else if(nd)h+=`<div><div class="lbl">다음 운동</div><div class="row between"><h3>${esc(nd.key)} · ${esc(nd.title)}</h3><span class="small muted">${nd.items.length}개 운동</span></div></div><button class="btn pri wide" data-act="start" data-day="${esc(nd.key)}">운동 시작</button>`;
   else h+=`<p class="muted">아직 루틴이 없어요. 기록 탭에서 프로필을 입력하고 루틴을 만드세요.</p><button class="btn pri wide" data-act="goPlan">루틴 만들기</button>`;
+  if(!S.session)h+=`<button class="btn ghost wide" data-act="actQuick">+ 러닝·라이딩·피클볼 등 활동 직접 기록</button>`;
   h+=`</section>`+streakCard(S.me);
   const recv=S.cheers.filter(c=>c.to===S.me).slice(-6).reverse();const un=unseenCheers();
   if(recv.length)h+=`<section class="card"><div class="row between"><h3>받은 칭찬${un.length?` <span class="pill bad">새 ${un.length}</span>`:''}</h3>${un.length?`<button class="btn sm ghost" data-act="seenCheers">모두 확인</button>`:''}</div>
@@ -780,11 +792,11 @@ function actForm(){const kg=kgOf(S.me);
   if(!S.actForm)return`<button class="btn wide" data-act="actForm">+ 운동 외 활동 기록 (골프·농구·걷기·피클볼 등)</button>`;
   return`<form class="card" data-form="act"><div class="row between"><h3>활동 기록</h3><button type="button" class="btn sm ghost" data-act="actForm">닫기</button></div>
    <div class="grid2"><div class="fl"><label for="af_date">날짜</label><input id="af_date" type="date" value="${today()}" max="${today()}"></div><div class="fl"><label for="af_min">시간 (분)</label><input id="af_min" inputmode="numeric" placeholder="60"></div></div>
-   <div class="fl"><label for="af_type">종류</label><select id="af_type">${actOptions('golf')}</select></div>
+   <div class="grid2"><div class="fl"><label for="af_type">종류</label><select id="af_type">${actOptions('run')}</select></div><div class="fl"><label for="af_dist">거리 km (러닝·라이딩·걷기)</label><input id="af_dist" inputmode="decimal" placeholder="예: 5.2"></div></div>
    <div class="grid2"><div class="fl"><label for="af_name">이름 (기타일 때)</label><input id="af_name" maxlength="30" placeholder="예: 등산"></div><div class="fl"><label for="af_kcal">워치 칼로리 (선택)</label><input id="af_kcal" inputmode="numeric" placeholder="비우면 추정"></div></div>
    <div class="fl"><label for="af_note">한마디 (가족 피드에 보여요)</label><input id="af_note" maxlength="300"></div>
    ${kg?'':`<p class="small" style="color:var(--warn)">프로필에 체중을 넣어야 칼로리를 추정할 수 있어요. 워치 값은 바로 저장돼요.</p>`}
-   <button class="btn pri wide" type="submit" ${S.busy?'disabled':''}>저장·가족에 공유</button><p class="small muted">스트릭에는 포함되고, 주간 운동 횟수·성취도에는 들어가지 않아요.</p></form>`}
+   <button class="btn pri wide" type="submit" ${S.busy?'disabled':''}>저장·가족에 공유</button><p class="small muted">거리를 넣으면 평균 속도로 칼로리를 더 정확히 계산해요. 스트릭에는 포함되고, 주간 운동 횟수·성취도에는 들어가지 않아요.</p></form>`}
 function vWork(){
   const rt=S.routines[S.me];if(S.session)return vSession();
   if(!rt)return actForm()+`<div class="card"><div class="empty"><h3>루틴이 없어요</h3><p>기록 탭에서 루틴을 만든 뒤 여기서 시작하세요.</p></div><button class="btn pri" data-act="goPlan">루틴 만들기</button></div>`;
@@ -821,9 +833,9 @@ function vSession(){
    h+=`<section class="card"><div class="row between"><h3>활동 칼로리</h3><span class="num" style="font-size:22px">${kg||+s.watch>0?`${+s.watch>0?'':'약 '}${tot.toLocaleString()}<span class="small">kcal</span>`:'-'}</span></div>
     ${kg?`<div class="small muted">근력 ${mins}분 · 평균 MET ${met.toFixed(1)}${sk.extra.map(a=>` · ${a.n} ${a.min}분`).join('')} · 체중 ${fmtN(kg)}kg${fac!==1?` · 워치 보정 ×${fac}`:''}${+s.watch>0?' (워치 값 사용 중)':''}</div>`:`<p class="small" style="color:var(--warn)">프로필에 체중을 넣으면 칼로리를 추정해요.</p>`}
     <div class="fl"><label for="sessWatch">워치로 잰 근력운동 칼로리 (선택)</label><input id="sessWatch" inputmode="numeric" data-in="watch" value="${esc(s.watch||'')}" placeholder="비우면 추정값 저장"></div>
-    ${acts.length?`<div>${acts.map((x,i)=>`<div class="exline"><span>${esc(x.n)} ${x.min}분</span><span class="num">${x.kcal!=null?(x.src==='watch'?'':'약 ')+x.kcal+'kcal':'칼로리 없음'} <button class="btn sm ghost" data-act="sessActDel" data-i="${i}" style="padding:0 6px">빼기</button></span></div>`).join('')}</div>`:''}
+    ${acts.length?`<div>${acts.map((x,i)=>`<div class="exline"><span>${actTxt(x)}</span><span class="num">${x.kcal!=null?(x.src==='watch'?'':'약 ')+x.kcal+'kcal':'칼로리 없음'} <button class="btn sm ghost" data-act="sessActDel" data-i="${i}" style="padding:0 6px">빼기</button></span></div>`).join('')}</div>`:''}
     <form data-form="sessAct" style="display:flex;flex-direction:column;gap:8px"><div class="lbl">유산소·추가 활동</div><select id="sa_type" aria-label="활동 종류">${actOptions('walk_fast')}</select>
-     <div class="grid2"><input id="sa_min" inputmode="numeric" placeholder="분" aria-label="시간(분)"><input id="sa_kcal" inputmode="numeric" placeholder="워치 kcal (선택)" aria-label="워치 칼로리"></div>
+     <div class="grid2"><input id="sa_min" inputmode="numeric" placeholder="분" aria-label="시간(분)"><input id="sa_dist" inputmode="decimal" placeholder="거리 km (선택)" aria-label="거리 km"></div><input id="sa_kcal" inputmode="numeric" placeholder="워치 kcal (선택)" aria-label="워치 칼로리">
      <button class="btn sm" type="submit">+ 활동 추가</button></form></section>`}
   h+=`<div class="fl"><label for="sessNote">한마디 (가족 피드에 보여요)</label><textarea id="sessNote" data-in="note" placeholder="컨디션, 오늘의 느낌">${esc(s.note||'')}</textarea></div>
    <div class="grid2"><button class="btn danger" data-act="cancelSess">${S.confirm==='sess'?'정말 취소':'운동 취소'}</button><button class="btn pri" data-act="finish" ${doneSets&&!S.busy?'':'disabled'}>완료·가족에 공유</button></div>`;
@@ -895,7 +907,7 @@ function postCard(l){
   const prs=prsOf(l.member,l.ts).filter(p=>p.date===l.date);
   return`<article class="post" style="--c:${colorVar(m)}"><div class="row between"><div class="who2"><span class="plate"></span><div><b>${esc(m?.name||'')}</b><div class="small muted">${md(l.date)} · ${esc(l.dayKey||'')} ${esc(l.dayTitle||'')}</div></div></div><span class="small muted"><span class="num">${l.durationMin||0}</span>분${isAct(l)?'':` · <span class="num">${(l.volume||0).toLocaleString()}</span>kg`}</span></div>
    ${prs.length?`<div class="row">${prs.map(p=>`<span class="pill good">기록 경신 ${esc(EX[p.ex].n)} ${fmtN(p.prev)}→${fmtN(p.w)}kg</span>`).join('')}</div>`:''}
-   <div class="small">${summary}${(l.acts||[]).length?`${summary?'<br>':''}${l.acts.map(a=>`${esc(a.n)} ${a.min}분`).join(', ')}`:''}</div>${(()=>{const k=logKcal(l);return k?`<div><span class="pill warn">🔥 ${kcalTxt(k)}</span></div>`:''})()}${l.note?`<div class="msg">${esc(l.note)}</div>`:''}
+   <div class="small">${summary}${(l.acts||[]).length?`${summary?'<br>':''}${l.acts.map(actTxt).join(', ')}`:''}</div>${(()=>{const k=logKcal(l);return k?`<div><span class="pill warn">🔥 ${kcalTxt(k)}</span></div>`:''})()}${l.note?`<div class="msg">${esc(l.note)}</div>`:''}
    <div class="reacts">${REACTS.map(r=>{const list=byEmoji[r]||[];const mineR=list.find(c=>c.from===S.me);return`<button class="react" ${mine?'disabled':''} data-act="${mineR?'unreact':'react'}" data-log="${l.id}" data-e="${r}" ${mineR?`data-id="${mineR.id}"`:''} aria-pressed="${!!mineR}">${r}${list.length?`<span class="num">${list.length}</span>`:''}</button>`}).join('')}
    ${Object.keys(byEmoji).length?`<span class="small muted" style="align-self:center">${[...new Set(cs.map(c=>M(c.from)?.name).filter(Boolean))].map(esc).join(', ')}</span>`:''}</div>
    ${msgs.length?`<div class="msgs">${msgs.map(c=>`<div class="msg"><b>${esc(M(c.from)?.name||'')}</b> ${esc(c.emoji)} ${esc(c.msg)}${c.from===S.me?` <button class="btn sm ghost" data-act="unreact" data-id="${c.id}" style="padding:0 6px">지우기</button>`:''}</div>`).join('')}</div>`:''}
@@ -978,7 +990,7 @@ function vHist(id){const logs=logsOf(id);
   const start=addDays(monday(new Date()),-77);const set=new Set(logs.map(l=>l.date));const cells=[];for(let i=0;i<84;i++){const s=dstr(addDays(start,i));cells.push(`<i class="${set.has(s)?'on':''}" title="${s}"></i>`)}
   let h=`<section class="card"><h3>출석 12주</h3><div class="heat">${cells.join('')}</div></section><section class="card"><h3>최근 운동</h3>`;
   h+=logs.slice(0,30).map(l=>`<div class="log"><div class="row between"><b>${md(l.date)} · ${esc(l.dayKey||'')} ${esc(l.dayTitle||'')}</b><span class="small muted">${l.durationMin||0}분${isAct(l)?'':' · '+(l.volume||0).toLocaleString()+'kg'}${logKcal(l)?' · '+kcalTxt(logKcal(l)):''}</span></div>
-    <div class="small muted">${(l.acts||[]).map(a=>`${esc(a.n)} ${a.min}분${a.kcal!=null?` (${a.src==='watch'?'':'약 '}${a.kcal}kcal)`:''}`).join(', ')}${(l.acts||[]).length&&(l.entries||[]).length?' / ':''}${(l.entries||[]).map(en=>`${esc(EX[en.ex]?.n||en.ex)} ${en.sets.map(s=>['load','assist'].includes(EX[en.ex]?.k)?fmtN(s.w)+'×'+s.r:s.r).join(', ')}`).join(' / ')}</div>${l.note?`<div class="small">${esc(l.note)}</div>`:''}
+    <div class="small muted">${(l.acts||[]).map(a=>`${actTxt(a)}${a.kcal!=null?` (${a.src==='watch'?'':'약 '}${a.kcal}kcal)`:''}`).join(', ')}${(l.acts||[]).length&&(l.entries||[]).length?' / ':''}${(l.entries||[]).map(en=>`${esc(EX[en.ex]?.n||en.ex)} ${en.sets.map(s=>['load','assist'].includes(EX[en.ex]?.k)?fmtN(s.w)+'×'+s.r:s.r).join(', ')}`).join(' / ')}</div>${l.note?`<div class="small">${esc(l.note)}</div>`:''}
     ${id===S.me?`<div>${S.confirm===l.id?`<button class="btn sm danger" data-act="delLog" data-id="${l.id}">정말 삭제</button> <button class="btn sm ghost" data-act="confirmOff">취소</button>`:`<button class="btn sm ghost" data-act="confirm" data-id="${l.id}">삭제</button>`}</div>`:''}</div>`).join('');
   return h+`</section>`}
 function vPlan(id){
@@ -1100,6 +1112,7 @@ async function onClick(ev){
    case'doUpdate':if(S.session){toast('진행 중인 운동을 먼저 저장하거나 취소하세요');return}await hardReload(a.dataset.v);return;
    case'aiClearFile':S.ai.file=null;break;
    case'actForm':S.actForm=!S.actForm;break;
+   case'actQuick':S.actForm=true;S.tab='work';lsSet('gn_tab','work');window.scrollTo(0,0);break;
    case'sessActDel':S.session.acts.splice(+a.dataset.i,1);saveDraft();break;
    case'aiDiscard':if(a.dataset.req)await act('gn_ai_request_close',{p_id:a.dataset.req,p_status:'dismissed'});S.ai.preview=null;break;
    case'aiSave':{let P0=S.ai.preview;if(!P0&&a.dataset.req){const r=(S.aiReqs||[]).find(x=>x.id===a.dataset.req);if(r)P0={member:r.member,req:r.id,rt:aiNormalize(r.result,P(r.member)),extracted:r.result.extracted||{}}}if(!P0)break;const x=P0.extracted||{};
@@ -1192,13 +1205,13 @@ document.addEventListener('submit',async ev=>{ev.preventDefault();const f=ev.tar
   else if(f.dataset.form==='ai'){S.ai.prompt=($('#aiPrompt')?.value||'');if(!S.ai.prompt.trim()&&!S.ai.file){toast('원하는 내용을 쓰거나 파일을 올려주세요.');return}await runAI()}
   else if(f.dataset.form==='sessAct'){const min=num('sa_min');const w=num('sa_kcal');const ty=v('sa_type');if(!(min>0)){toast('시간(분)을 입력하세요.');return}
     if(!ACT[ty]?.met&&!(w>0)){toast('이 활동은 공인 MET 값이 없어서 워치 칼로리를 같이 넣어주세요.');return}
-    S.session.acts=S.session.acts||[];S.session.acts.push(actEntry(ty,min,kgOf(S.me),w));saveDraft();f.querySelectorAll('input').forEach(x=>{x.value='';delete x.dataset.dirty});render()}
+    S.session.acts=S.session.acts||[];S.session.acts.push(actEntry(ty,min,kgOf(S.me),w,'',num('sa_dist')));saveDraft();f.querySelectorAll('input').forEach(x=>{x.value='';delete x.dataset.dirty});render()}
   else if(f.dataset.form==='act'){const min=num('af_min');const w=num('af_kcal');const ty=v('af_type');const date=v('af_date')||today();
     if(!(min>0)){toast('시간(분)을 입력하세요.');return}if(date>today()){toast('미래 날짜는 기록할 수 없어요.');return}
     if(!ACT[ty]?.met&&!(w>0)){toast('이 활동은 공인 MET 값이 없어서 워치 칼로리를 같이 넣어주세요.');return}
-    const a=actEntry(ty,min,kgOf(S.me),w,v('af_name'));
+    const a=actEntry(ty,min,kgOf(S.me),w,v('af_name'),num('af_dist'));
     const data={kind:'act',dayKey:'+',dayTitle:a.n,entries:[],planned:0,volume:0,durationMin:a.min,note:v('af_note').slice(0,300),acts:[a]};
-    const st0=streakOf(S.me);if(await act('gn_add_log',{p_date:date,p_data:data},'활동을 기록했어요')){S.actForm=false;const st1=streakOf(S.me);if(date===today()&&!st0.todayDone)setTimeout(()=>celebrate(st0.streak,st1,st1.freezes>st0.freezes),250)}render()}
+    const st0=streakOf(S.me);if(await act('gn_add_log',{p_date:date,p_data:data},`활동을 기록했어요${a.kcal!=null?` · ${a.src==='watch'?'':'약 '}${a.kcal}kcal`:''}`)){S.actForm=false;const st1=streakOf(S.me);if(date===today()&&!st0.todayDone)setTimeout(()=>celebrate(st0.streak,st1,st1.freezes>st0.freezes),250)}render()}
   else if(f.dataset.form==='cheer'){const msg=v('cm_'+f.dataset.log);if(!msg)return;if(await act('gn_cheer',{p_log:f.dataset.log,p_emoji:'💬',p_msg:msg},'칭찬을 보냈어요'))S.openMsg=null;render()}});
 
 /* ---------- 자동 업데이트 ---------- */
