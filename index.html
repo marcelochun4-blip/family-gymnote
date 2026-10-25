@@ -375,7 +375,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.26-0552';
+const APP_VER='2026.10.26-0619';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -555,7 +555,7 @@ async function load(silent){
     const mem={};st.members.forEach(m=>mem[m.id]=m);S.members=mem;S.routines=st.routines||{};
     S.logs=(st.logs||[]).map(l=>({...(l.data||{}),id:l.id,member:l.member,date:l.date,ts:l.ts}));S.cheers=st.cheers||[];
     S.me=st.me;lsSet('gn_me',S.me);avSync().then(()=>{if(document.querySelector('.plate.hasav'))avStyleSync()});try{S.aiReqs=await api('gn_ai_requests_list',{p_token:S.token})||[]}catch(e){S.aiReqs=S.aiReqs||[]}if(!S.view||!mem[S.view])S.view=S.me;S.loaded=true;
-    const busyForm=document.querySelector('#main [data-dirty]')||document.querySelector('#main form.prof')||S.edit||S.openMsg;
+    const busyForm=document.querySelector('#main [data-dirty]')||document.querySelector('#main form.prof')||S.edit||S.openMsg||S.picking||S.sheet?.type==='crop';
     if(!(silent&&((S.tab==='work'&&S.session)||busyForm)))render()}
   catch(e){if(!silent||e.auth)toast(e.msg);if(e.auth||!S.loaded){S.loadErr=e.msg;render()}}}
 async function act(fn,body,okMsg){if(S.busy){toast('처리 중이에요. 잠시만요.');return false}S.busy=true;try{const r=await api(fn,{p_token:S.token,...body});if(okMsg)toast(okMsg);await load(true);return r??true}catch(e){toast(e.msg);return false}finally{S.busy=false}}
@@ -765,6 +765,39 @@ function avStyleSync(){const cache=lsGet('gn_av')||{};let css='';memberList().fo
 async function avSync(){const cache=lsGet('gn_av')||{};const need=memberList().some(m=>m.av&&(!cache[m.id]||cache[m.id].v!==m.av));
   if(need){try{const r=await api('gn_avatars_get',{p_token:S.token})||{};const nc={};Object.entries(r).forEach(([id,x])=>{if(x&&x.data)nc[id]={v:x.v,data:x.data}});lsSet('gn_av',nc)}catch(e){}}
   avStyleSync()}
+/* 파일 선택은 화면 밖 고정 input으로: 사진 앨범에서 돌아올 때 화면이 새로 그려져도 선택이 사라지지 않게 */
+function pickFile(accept,cb){let el=document.getElementById('gFile');
+  if(!el){el=document.createElement('input');el.type='file';el.id='gFile';el.style.display='none';document.body.appendChild(el);
+    el.addEventListener('change',()=>{const f=el.files&&el.files[0];const c=el._cb;el._cb=null;S.picking=false;if(f&&c)c(f);el.value=''});
+    el.addEventListener('cancel',()=>{S.picking=false})}
+  el.accept=accept;el._cb=cb;S.picking=true;setTimeout(()=>{S.picking=false},180000);el.click()}
+function loadImg(f){return new Promise((res,rej)=>{const url=URL.createObjectURL(f);const i=new Image();i.onload=()=>res(i);i.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('img'))};i.src=url})}
+// 자르기: 정사각 캔버스에 원형 가이드, 드래그로 이동·핀치/슬라이더로 확대
+const CROP_V=600;
+function cropDraw(out,N){const s=S.sheet;if(!s||s.type!=='crop')return;const img=s.img,V=CROP_V;const b=V/Math.min(img.naturalWidth,img.naturalHeight),sc=b*s.z;
+  const w=img.naturalWidth*sc,hh=img.naturalHeight*sc;const mx=Math.max(0,(w-V)/2),my=Math.max(0,(hh-V)/2);s.x=Math.max(-mx,Math.min(mx,s.x));s.y=Math.max(-my,Math.min(my,s.y));
+  const cv=out||document.getElementById('cropCv');if(!cv)return;const k=(N||V)/V;const g=cv.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);g.imageSmoothingQuality='high';
+  g.drawImage(img,(V/2-w/2+s.x)*k,(V/2-hh/2+s.y)*k,w*k,hh*k);
+  if(!out){g.fillStyle='rgba(0,0,0,.45)';g.beginPath();g.rect(0,0,V,V);g.arc(V/2,V/2,V/2-4,0,Math.PI*2,true);g.fill('evenodd');g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();g.arc(V/2,V/2,V/2-4,0,Math.PI*2);g.stroke()}}
+function cropSheet(s){return`<div class="row between"><div><div class="lbl">${esc(M(s.member)?.name||'')}</div><h2>사진 자르기</h2></div><button class="btn sm" data-act="closeSheet">취소</button></div>
+  <p class="small muted">끌어서 위치를 옮기고, 두 손가락이나 아래 막대로 확대하세요.</p>
+  <canvas id="cropCv" width="${CROP_V}" height="${CROP_V}" style="width:100%;max-width:320px;aspect-ratio:1;margin:0 auto;display:block;touch-action:none;border-radius:12px;background:#111"></canvas>
+  <input type="range" id="cropZoom" min="1" max="4" step="0.01" value="${s.z}" aria-label="확대">
+  <button class="btn pri wide" data-act="cropSave" ${S.busy?'disabled':''}>이 사진으로 저장</button>`}
+function cropBind(){const cv=document.getElementById('cropCv');if(!cv||cv._b)return;cv._b=1;cropDraw();const pts=new Map();let last=null;
+  const scaleOf=()=>CROP_V/cv.getBoundingClientRect().width;
+  cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});last=null});
+  cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;const p=pts.get(e.pointerId);const s=S.sheet;
+    if(pts.size===1){s.x+=(e.clientX-p.x)*scaleOf();s.y+=(e.clientY-p.y)*scaleOf()}
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2){const [a,b]=[...pts.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);if(last)s.z=Math.max(1,Math.min(4,s.z*d/last));last=d;const zr=document.getElementById('cropZoom');if(zr)zr.value=s.z}
+    cropDraw()});
+  const up=e=>{pts.delete(e.pointerId);last=null};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  document.getElementById('cropZoom')?.addEventListener('input',e=>{S.sheet.z=+e.target.value;cropDraw()})}
+async function avPick(member){pickFile('image/*',async f=>{try{const img=await loadImg(f);S.sheet={type:'crop',member,img,z:1,x:0,y:0};renderSheet()}catch(e){toast('사진을 읽지 못했어요. 다른 사진으로 시도해주세요.')}})}
+async function cropSave(){const s=S.sheet;if(!s||s.type!=='crop')return;const N=256,c=document.createElement('canvas');c.width=N;c.height=N;cropDraw(c,N);const data=c.toDataURL('image/jpeg',.85);
+  const v=await act('gn_set_avatar',{p_member:s.member,p_data:data},'사진을 저장했어요');
+  if(v){const cache=lsGet('gn_av')||{};cache[s.member]={v:+v,data};lsSet('gn_av',cache);try{URL.revokeObjectURL(s.img.src)}catch(e){}S.sheet=null;avStyleSync();renderSheet();render()}}
 async function avatarFromFile(f){const url=URL.createObjectURL(f);try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=url});
   const s=Math.min(img.naturalWidth,img.naturalHeight),N=256,c=document.createElement('canvas');c.width=N;c.height=N;
   c.getContext('2d').drawImage(img,(img.naturalWidth-s)/2,(img.naturalHeight-s)/2,s,s,0,0,N,N);return c.toDataURL('image/jpeg',.82)}finally{URL.revokeObjectURL(url)}}
@@ -986,7 +1019,7 @@ function pickSheet(s){const cur=s.mode==='swap'?S.session?.entries[s.e]:null;con
    <label class="row small" style="gap:8px"><input type="checkbox" id="pickPersist" data-chk="pickPersist" ${s.persist?'checked':''}> 다음부터 루틴에도 반영</label>
    <div class="picklist">${list.map(([id,e])=>{const w=lastWeight(S.me,id);return`<button class="gitem" data-act="pickEx" data-ex="${id}">${hasImg(id)?`<img src="${imgSrc(id,0)}" alt="" loading="lazy">`:'<span class="noimg">이미지 없음</span>'}<div><b>${esc(e.n)}</b><span class="small muted">${e.eq}${w!=null?` · 지난 기록 ${fmtN(w)}kg`:''}</span></div></button>`}).join('')||'<p class="small muted">이 부위에 추가할 수 있는 운동이 없어요.</p>'}</div>`}
 function renderSheet(){const s=S.sheet;if(!s){$('#sheetSlot').innerHTML='';document.body.style.overflow='';return}
-  $('#sheetSlot').innerHTML=`<div class="sheet" data-act="closeSheetBg"><div class="panel" role="dialog" aria-modal="true">${s.type==='howto'?howtoSheet(s.ex):s.type==='pick'?pickSheet(s):''}</div></div>`;document.body.style.overflow='hidden'}
+  $('#sheetSlot').innerHTML=`<div class="sheet" data-act="closeSheetBg"><div class="panel" role="dialog" aria-modal="true">${s.type==='howto'?howtoSheet(s.ex):s.type==='pick'?pickSheet(s):s.type==='crop'?cropSheet(s):''}</div></div>`;document.body.style.overflow='hidden';if(s.type==='crop')cropBind()}
 
 /* ---------- 기록(성취·히스토리·루틴) ---------- */
 function vMe(){
@@ -1034,7 +1067,7 @@ function vPlan(id){
   const avc=(lsGet('gn_av')||{})[id];const avd=m.av&&avc&&avc.v===m.av?avc.data:null;
   let h=`<section class="card"><div class="row between"><h2>${esc(m.name)} 프로필</h2><button class="btn sm" data-act="profToggle">${S.profEdit?'닫기':'수정'}</button></div>
    <div class="avedit" style="--c:${colorVar(m)}"><span class="big" ${avd?`style="background-image:url('${avd}')"`:''}>${avd?'':esc((m.name||'?').length>=3?m.name.slice(-2):(m.name||'?'))}</span>
-    <div class="row" style="gap:8px"><label class="btn sm" for="avFile" style="cursor:pointer">${avd?'사진 바꾸기':'사진 올리기'}</label><input type="file" id="avFile" accept="image/*" hidden data-member="${esc(id)}">${avd?`<button class="btn sm ghost" data-act="avDel" data-id="${esc(id)}">${S.confirm==='av'+id?'정말 삭제':'삭제'}</button>`:''}</div></div>`;
+    <div class="row" style="gap:8px"><button class="btn sm" data-act="avPick" data-id="${esc(id)}">${avd?'사진 바꾸기':'사진 올리기'}</button>${avd?`<button class="btn sm ghost" data-act="avDel" data-id="${esc(id)}">${S.confirm==='av'+id?'정말 삭제':'삭제'}</button>`:''}</div></div>`;
   if(S.profEdit||!p.goal)h+=vProfForm(m);
   else h+=`<div class="row small">${[p.sex,p.age&&p.age+'세',p.height&&p.height+'cm',p.weight&&p.weight+'kg',p.bodyFat&&'체지방 '+p.bodyFat+'%',p.level,p.goal,'주 '+(p.days||3)+'회',(p.minutes||60)+'분',p.env].filter(Boolean).map(x=>`<span class="pill">${esc(x)}</span>`).join('')}</div>${p.notes?`<p class="small muted">${esc(p.notes)}</p>`:''}`;
   h+=`</section><section class="card"><h3>루틴 새로 만들기</h3><p class="small muted">나이·체중·수준·목표·주 횟수·시간·환경을 반영해 주간 루틴을 만들어요. 기존 루틴은 교체되고 기록은 그대로 남아요.</p>
@@ -1059,8 +1092,7 @@ function vAI(id){const A=S.ai;
   let h=`<section class="card"><div><div class="lbl">AI 맞춤</div><h3>원하는 대로 루틴 요청하기</h3></div>
    <p class="small muted">하고 싶은 것, 피하고 싶은 것, 부상·통증을 자유롭게 쓰고 인바디 결과지 사진이나 PDF를 올리면 Claude가 함께 반영해서 만들어줘요. 완성되면 이 화면에 미리보기가 떠요.</p>
    <form data-form="ai" class="fl" style="gap:10px"><textarea id="aiPrompt" data-in="aiPrompt" placeholder="예) 무릎이 안 좋아서 점프·깊은 스쿼트는 빼고, 상체 위주로 주 4회. 팔뚝 살 빼고 싶어요." ${A.busy?'disabled':''}>${esc(A.prompt)}</textarea>
-   <label class="btn" for="aiFile" style="text-align:center">${A.file?'📎 '+esc(A.file.name)+' ('+Math.round(A.file.size/1024)+'KB) · 바꾸기':'📎 인바디·검사지 사진 또는 PDF 올리기 (선택)'}</label>
-   <input id="aiFile" type="file" accept="image/*,application/pdf" hidden>
+   <button type="button" class="btn" data-act="aiPick" style="text-align:center">${A.file?'📎 '+esc(A.file.name)+' ('+Math.round(A.file.size/1024)+'KB) · 바꾸기':'📎 인바디·검사지 사진 또는 PDF 올리기 (선택)'}</button>
    ${A.file?`<button type="button" class="btn sm ghost" data-act="aiClearFile" style="align-self:flex-start">첨부 빼기</button>`:''}
    <button class="btn pri wide" type="submit" ${A.busy?'disabled':''}>${A.busy?'보내는 중…':'Claude에게 루틴 요청'}</button></form>
    ${A.err?`<p class="small" style="color:var(--bad)">${esc(A.err)}</p>`:''}</section>`;
@@ -1138,7 +1170,7 @@ function fmtK(v){return v>=1000?fmtN(Math.round(v/100)/10)+'k':fmtN(Math.round(v
 document.addEventListener('click',ev=>{onClick(ev).catch(e=>{S.busy=false;toast('오류: '+(e&&(e.msg||e.message)||e));render()})});
 async function onClick(ev){
   audioUnlock();const a=ev.target.closest('[data-act]');if(!a)return;const k=a.dataset.act;
-  if(k==='closeSheetBg'&&ev.target!==a)return;
+  if(k==='closeSheetBg'&&(ev.target!==a||S.sheet?.type==='crop'))return;
   switch(k){
    case'tab':S.tab=a.dataset.tab;lsSet('gn_tab',S.tab);S.addMember=false;S.confirm=null;if(S.tab==='me'&&a.id==='whoBtn')S.view=S.me;window.scrollTo(0,0);break;
    case'goPlan':S.tab='me';S.view=S.me;S.meSeg='plan';lsSet('gn_tab','me');break;
@@ -1151,6 +1183,9 @@ async function onClick(ev){
    case'doUpdate':if(S.session){toast('진행 중인 운동을 먼저 저장하거나 취소하세요');return}await hardReload(a.dataset.v);return;
    case'aiClearFile':S.ai.file=null;break;
    case'actForm':S.actForm=!S.actForm;break;
+   case'avPick':avPick(a.dataset.id);return;
+   case'cropSave':await cropSave();return;
+   case'aiPick':pickFile('image/*,application/pdf',onAiFile);return;
    case'avDel':{const id=a.dataset.id;if(S.confirm!=='av'+id){S.confirm='av'+id;break}S.confirm=null;if(await act('gn_set_avatar',{p_member:id,p_data:null},'사진을 지웠어요')){const c=lsGet('gn_av')||{};delete c[id];lsSet('gn_av',c);avStyleSync()}break}
    case'actQuick':S.actForm=true;S.tab='work';lsSet('gn_tab','work');window.scrollTo(0,0);break;
    case'sessActDel':S.session.acts.splice(+a.dataset.i,1);saveDraft();break;
@@ -1219,16 +1254,12 @@ document.addEventListener('change',ev=>{const t=ev.target;if(t.type!=='file'&&t.
   else if(k==='pickPersist'){if(S.sheet)S.sheet.persist=t.checked}
   else if(k==='ramp')S.edit.rt.ramp=t.checked;else if(k==='aiApplyProf')S.ai.applyProf=t.checked;else if(k==='statEx'){S.statEx=t.value;render()}
   else if(k==='dow'){const d=S.edit.rt.days[+t.dataset.d];if(t.value)d.dow=t.value;else delete d.dow}});
-document.addEventListener('change',async ev=>{const t=ev.target;if(t.id!=='avFile'||!t.files||!t.files[0])return;
-  try{const data=await avatarFromFile(t.files[0]);const id=t.dataset.member;const v=await act('gn_set_avatar',{p_member:id,p_data:data},'사진을 올렸어요');
-    if(v){const c=lsGet('gn_av')||{};c[id]={v:+v,data};lsSet('gn_av',c);avStyleSync();render()}}
-  catch(e){toast('사진을 읽지 못했어요. 다른 사진으로 시도해주세요.')}t.value=''});
-document.addEventListener('change',async ev=>{const t=ev.target;if(t.id!=='aiFile'||!t.files||!t.files[0])return;const f=t.files[0];
+async function onAiFile(f){
   try{if(f.type==='application/pdf'){if(f.size>2.8*1024*1024){toast('PDF는 2.8MB 이하만 올릴 수 있어요. 사진으로 찍어 올려도 돼요.');return}S.ai.file={name:f.name,type:f.type,size:f.size,data:await fileToB64(f)}}
     else if(f.type.startsWith('image/')||/\.(heic|heif)$/i.test(f.name)){const j=await imageToJpeg(f);S.ai.file={name:f.name,...j}}
     else{toast('사진 또는 PDF만 올릴 수 있어요.');return}}
   catch(e){toast('파일을 읽지 못했어요. 다른 사진으로 시도해주세요.');return}
-  render()});
+  render()}
 let draftT;
 document.addEventListener('input',ev=>{const t=ev.target;if(t.type!=='file'&&t.closest&&t.closest('form'))t.dataset.dirty='1';
   if(t.dataset.in==='w'||t.dataset.in==='r'){S.session.entries[+t.dataset.e].sets[+t.dataset.s][t.dataset.in]=t.value.replace(/[^\d.]/g,'');clearTimeout(draftT);draftT=setTimeout(saveDraft,400)}
