@@ -375,7 +375,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.27-0418';
+const APP_VER='2026.10.27-0455';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -862,7 +862,7 @@ function actForm(){const kg=kgOf(S.me);
   return`<form class="card" data-form="act"><div class="row between"><h3>활동 기록</h3><button type="button" class="btn sm ghost" data-act="actForm">닫기</button></div>
    <div class="grid2"><div class="fl"><label for="af_date">날짜</label><input id="af_date" type="date" value="${today()}" max="${today()}"></div><div class="fl"><label for="af_min">시간 (분)</label><input id="af_min" inputmode="numeric" placeholder="60"></div></div>
    <div class="grid2"><div class="fl"><label for="af_type">종류</label><select id="af_type">${actOptions('run')}</select></div><div class="fl"><label for="af_dist">거리 km (러닝·라이딩·걷기)</label><input id="af_dist" inputmode="decimal" placeholder="예: 5.2"></div></div>
-   <div class="grid2"><div class="fl"><label for="af_name">이름 (기타일 때)</label><input id="af_name" maxlength="30" placeholder="예: 등산"></div><div class="fl"><label for="af_kcal">워치 칼로리 (선택)</label><input id="af_kcal" inputmode="numeric" placeholder="비우면 추정"></div></div>
+   <div class="grid2"><div class="fl"><label for="af_name">이름 (기타일 때)</label><input id="af_name" maxlength="30" placeholder="예: 등산"></div><div class="fl"><label for="af_kcal">워치 활동 칼로리 (선택)</label><input id="af_kcal" inputmode="numeric" placeholder="총 칼로리 말고 활동 칼로리"></div></div>
    <div class="fl"><label for="af_note">한마디 (가족 피드에 보여요)</label><input id="af_note" maxlength="300"></div>
    ${kg?'':`<p class="small" style="color:var(--warn)">프로필에 체중을 넣어야 칼로리를 추정할 수 있어요. 워치 값은 바로 저장돼요.</p>`}
    <button class="btn pri wide" type="submit" ${S.busy?'disabled':''}>저장·가족에 공유</button><p class="small muted">거리를 넣으면 평균 속도로 칼로리를 더 정확히 계산해요. 스트릭에는 포함되고, 주간 운동 횟수·성취도에는 들어가지 않아요.</p></form>`}
@@ -901,10 +901,10 @@ function vSession(){
    const base=+s.watch>0?Math.round(+s.watch):(sk.est!=null?Math.round(sk.est*fac):null);const acts=s.acts||[];const tot=(base||0)+acts.reduce((a,x)=>a+(x.kcal||0),0);
    h+=`<section class="card"><div class="row between"><h3>활동 칼로리</h3><span class="num" style="font-size:22px">${kg||+s.watch>0?`${+s.watch>0?'':'약 '}${tot.toLocaleString()}<span class="small">kcal</span>`:'-'}</span></div>
     ${kg?`<div class="small muted">근력 ${mins}분 · 평균 MET ${met.toFixed(1)}${sk.extra.map(a=>` · ${a.n} ${a.min}분`).join('')} · 체중 ${fmtN(kg)}kg${fac!==1?` · 워치 보정 ×${fac}`:''}${+s.watch>0?' (워치 값 사용 중)':''}</div>`:`<p class="small" style="color:var(--warn)">프로필에 체중을 넣으면 칼로리를 추정해요.</p>`}
-    <div class="fl"><label for="sessWatch">워치로 잰 근력운동 칼로리 (선택)</label><input id="sessWatch" inputmode="numeric" data-in="watch" value="${esc(s.watch||'')}" placeholder="비우면 추정값 저장"></div>
+    <div class="fl"><label for="sessWatch">워치 활동 칼로리 (선택, 총 칼로리 말고)</label><input id="sessWatch" inputmode="numeric" data-in="watch" value="${esc(s.watch||'')}" placeholder="비우면 추정값 저장"></div>
     ${acts.length?`<div>${acts.map((x,i)=>`<div class="exline"><span>${actTxt(x)}</span><span class="num">${x.kcal!=null?(x.src==='watch'?'':'약 ')+x.kcal+'kcal':'칼로리 없음'} <button class="btn sm ghost" data-act="sessActDel" data-i="${i}" style="padding:0 6px">빼기</button></span></div>`).join('')}</div>`:''}
     <form data-form="sessAct" style="display:flex;flex-direction:column;gap:8px"><div class="lbl">유산소·추가 활동</div><select id="sa_type" aria-label="활동 종류">${actOptions('walk_fast')}</select>
-     <div class="grid2"><input id="sa_min" inputmode="numeric" placeholder="분" aria-label="시간(분)"><input id="sa_dist" inputmode="decimal" placeholder="거리 km (선택)" aria-label="거리 km"></div><input id="sa_kcal" inputmode="numeric" placeholder="워치 kcal (선택)" aria-label="워치 칼로리">
+     <div class="grid2"><input id="sa_min" inputmode="numeric" placeholder="분" aria-label="시간(분)"><input id="sa_dist" inputmode="decimal" placeholder="거리 km (선택)" aria-label="거리 km"></div><input id="sa_kcal" inputmode="numeric" placeholder="워치 활동 kcal (선택)" aria-label="워치 칼로리">
      <button class="btn sm" type="submit">+ 활동 추가</button></form></section>`}
   h+=`<div class="fl"><label for="sessNote">한마디 (가족 피드에 보여요)</label><textarea id="sessNote" data-in="note" placeholder="컨디션, 오늘의 느낌">${esc(s.note||'')}</textarea></div>
    <div class="grid2"><button class="btn danger" data-act="cancelSess">${S.confirm==='sess'?'정말 취소':'운동 취소'}</button><button class="btn pri" data-act="finish" ${doneSets&&!S.busy?'':'disabled'}>완료·가족에 공유</button></div>`;
