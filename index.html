@@ -179,11 +179,24 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .check{width:44px;height:42px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700;font-size:18px}
 .check[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff}
 
-.timer{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:12;background:var(--ink);color:var(--bg);border-radius:999px;padding:8px 10px 8px 18px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 24px rgba(0,0,0,.25)}
-.timer .num{font-size:24px}
-.timer button{background:transparent;border:1px solid color-mix(in srgb,var(--bg) 40%,transparent);color:var(--bg);border-radius:999px;padding:4px 10px;cursor:pointer;font-size:13px}
+.timer{position:fixed;left:12px;right:12px;margin:0 auto;max-width:520px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:12;transform:translate3d(0,var(--vvy,0px),0);
+  display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 10px 10px 12px;border-radius:22px;
+  background:var(--surface);background-image:linear-gradient(color-mix(in srgb,var(--me) 7%,transparent),color-mix(in srgb,var(--me) 7%,transparent));
+  border:1px solid color-mix(in srgb,var(--me) 30%,var(--line));box-shadow:0 10px 30px rgba(0,0,0,.18),0 2px 6px rgba(0,0,0,.08);color:var(--ink);animation:tmIn .25s ease-out}
+@keyframes tmIn{from{opacity:0;transform:translate3d(0,calc(var(--vvy,0px) + 14px),0)}}
+.tm-ring{position:relative;width:64px;height:64px;flex:none}.tm-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.tm-ring circle{fill:none;stroke-width:5}.tm-ring .bg{stroke:color-mix(in srgb,var(--me) 16%,transparent)}.tm-ring .fg{stroke:var(--me);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.tm-num{position:absolute;inset:0;display:grid;place-items:center;font-size:17px;font-weight:800;letter-spacing:-.02em}
+.tm-mid{min-width:0;display:flex;flex-direction:column;gap:3px}.tm-lbl{font-size:11px;font-weight:700;color:var(--me);letter-spacing:.04em}
+.tm-next{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-btns{display:flex;gap:6px;margin-top:3px}.tm-btns button{flex:none;border:1px solid var(--line);background:var(--sunk);color:var(--ink);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.tm-skip{align-self:stretch;min-width:64px;border:0;border-radius:16px;background:var(--me);color:var(--me-ink);font-size:12px;font-weight:800;line-height:1.2;cursor:pointer;white-space:nowrap;padding:0 10px}
+.tm-skip span{font-size:20px;line-height:1}
+.timer.urgent{border-color:var(--me);box-shadow:0 0 0 3px color-mix(in srgb,var(--me) 35%,transparent),0 10px 30px rgba(0,0,0,.2)}.timer.urgent .tm-num{color:var(--me)}
+html.kb .tabbar{display:none}
+body:has(#timerSlot .timer) main{padding-bottom:110px}html.kb .timer{bottom:8px}
 
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:11;background:var(--surface);border-top:1px solid var(--line);
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:11;transform:translate3d(0,var(--vvy,0px),0);background:var(--surface);border-top:1px solid var(--line);
   padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
 .tabbar .in{max-width:600px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
 .tabbar button{position:relative;background:none;border:0;padding:8px 0 10px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600}
@@ -329,7 +342,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 :root[data-skin="neon"] .meter i{box-shadow:0 0 8px var(--c,var(--me))}
 :root[data-skin="neon"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;background:repeating-linear-gradient(0deg,#ffffff06 0 1px,transparent 1px 3px)}
 :root[data-skin="pixel"] body{font-size:15px;letter-spacing:0}
-:root[data-skin="pixel"] .card,:root[data-skin="pixel"] .btn,:root[data-skin="pixel"] .chip,:root[data-skin="pixel"] .who,:root[data-skin="pixel"] .iconbtn,:root[data-skin="pixel"] .field,:root[data-skin="pixel"] .check,:root[data-skin="pixel"] .pill,:root[data-skin="pixel"] .seg,:root[data-skin="pixel"] .seg button,:root[data-skin="pixel"] .plate,:root[data-skin="pixel"] .meter,:root[data-skin="pixel"] .meter i,:root[data-skin="pixel"] .ex,:root[data-skin="pixel"] .post,:root[data-skin="pixel"] .gitem,:root[data-skin="pixel"] .flame,:root[data-skin="pixel"] .sday i{border-radius:0!important}
+:root[data-skin="pixel"] .card,:root[data-skin="pixel"] .btn,:root[data-skin="pixel"] .chip,:root[data-skin="pixel"] .who,:root[data-skin="pixel"] .iconbtn,:root[data-skin="pixel"] .field,:root[data-skin="pixel"] .check,:root[data-skin="pixel"] .pill,:root[data-skin="pixel"] .seg,:root[data-skin="pixel"] .seg button,:root[data-skin="pixel"] .plate,:root[data-skin="pixel"] .meter,:root[data-skin="pixel"] .meter i,:root[data-skin="pixel"] .ex,:root[data-skin="pixel"] .post,:root[data-skin="pixel"] .gitem,:root[data-skin="pixel"] .flame,:root[data-skin="pixel"] .sday i,:root[data-skin="pixel"] .timer,:root[data-skin="pixel"] .tm-skip,:root[data-skin="pixel"] .tm-btns button{border-radius:0!important}
 :root[data-skin="pixel"] .btn.pri{box-shadow:4px 4px 0 #0b0d22;border:3px solid #0b0d22}
 :root[data-skin="pixel"] .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #0b0d22}
 :root[data-skin="pixel"] .brand h1::before{content:"▶ ";color:var(--me)}
@@ -375,7 +388,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.10.27-0455';
+const APP_VER='2026.11.01-0751';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -961,12 +974,24 @@ function tone(freq,at,dur,vol){if(!actx)return;const o=actx.createOscillator(),g
   g.gain.setValueAtTime(0.0001,at);g.gain.exponentialRampToValueAtTime(vol,at+.015);g.gain.exponentialRampToValueAtTime(0.0001,at+dur);o.connect(g);g.connect(actx.destination);o.start(at);o.stop(at+dur+.05)}
 function beepTick(){if(!soundOn()||!actx)return;try{if(actx.state==='suspended')actx.resume();tone(660,actx.currentTime,.12,.25)}catch(e){}}
 function beepEnd(){if(!soundOn()||!actx)return;try{if(actx.state==='suspended')actx.resume();const t=actx.currentTime;tone(880,t,.22,.55);tone(880,t+.3,.22,.55);tone(1320,t+.6,.45,.6)}catch(e){}}
-function startTimer(sec){S.timer={end:Date.now()+sec*1000,lastTick:null};pushSchedule(sec);clearInterval(tick);tick=setInterval(()=>{if(!S.timer){clearInterval(tick);return}
-  const late=Date.now()-S.timer.end;if(late>1500){S.timer=null;clearInterval(tick);renderTimer();return} // 백그라운드에서 돌아온 경우: 푸시가 이미 울렸으니 조용히 정리
-  const left=Math.ceil((S.timer.end-Date.now())/1000); // 푸시는 앱을 보고 있어도 취소하지 않음 (영상 재생 중엔 앱 소리가 묻힐 수 있음)if(left>0&&left<=3&&S.timer.lastTick!==left){S.timer.lastTick=left;beepTick()}
-  if(Date.now()>=S.timer.end){S.timer=null;clearInterval(tick);beepEnd();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}toast('휴식 끝, 다음 세트!')}renderTimer()},200);renderTimer()}
-function renderTimer(){const t=S.timer;if(!t||S.tab!=='work'){$('#timerSlot').innerHTML='';return}const left=Math.max(0,Math.ceil((t.end-Date.now())/1000));
-  $('#timerSlot').innerHTML=`<div class="timer" role="timer"><span class="small">휴식</span><span class="num">${Math.floor(left/60)}:${pad(left%60)}</span><button data-act="tminus" aria-label="휴식 15초 줄이기">−15</button><button data-act="tplus" aria-label="휴식 15초 늘리기">+15</button><button data-act="tsnd" class="snd" aria-label="알림음 ${soundOn()?'끄기':'켜기'}">${soundOn()?'🔔':'🔕'}</button><button data-act="tskip">건너뛰기</button></div>`}
+function startTimer(sec,label,resume){S.timer=resume||{end:Date.now()+sec*1000,total:sec,label:label||'',lastTick:null};if(!resume)pushSchedule(sec);timerSave();timerLoop()}
+function timerSave(){if(S.session){S.session.timer=S.timer?{end:S.timer.end,total:S.timer.total,label:S.timer.label}:null;saveDraft()}}
+function timerLoop(){clearInterval(tick);tick=setInterval(()=>{if(!S.timer){clearInterval(tick);return}
+  const late=Date.now()-S.timer.end;if(late>1500){S.timer=null;timerSave();clearInterval(tick);renderTimer();return} // 백그라운드에서 돌아온 경우: 푸시가 이미 울렸으니 조용히 정리
+  const left=Math.ceil((S.timer.end-Date.now())/1000);
+  if(left>0&&left<=3&&S.timer.lastTick!==left){S.timer.lastTick=left;beepTick()}
+  if(Date.now()>=S.timer.end){S.timer=null;timerSave();clearInterval(tick);beepEnd();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}toast('휴식 끝, 다음 세트!')}renderTimer()},200);renderTimer()}
+function renderTimer(){const t=S.timer,slot=$('#timerSlot');if(!t||S.tab!=='work'){slot.innerHTML='';slot._key=null;return}
+  const ms=Math.max(0,t.end-Date.now()),left=Math.ceil(ms/1000),tot=Math.max(1,t.total||left),p=Math.min(1,ms/1000/tot),R=26,C=2*Math.PI*R;
+  const key=(t.label||'')+'|'+soundOn(),el=slot.firstElementChild;
+  if(el&&slot._key===key){el.querySelector('.tm-num').textContent=`${Math.floor(left/60)}:${pad(left%60)}`;el.querySelector('.fg').setAttribute('stroke-dashoffset',(C*(1-p)).toFixed(1));el.classList.toggle('urgent',left<=3);return}
+  slot._key=key;const urgent=left<=3?' urgent':'';
+  const html=`<div class="timer${urgent}" role="timer" aria-live="off">
+    <div class="tm-ring"><svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="${R}" class="bg"/><circle cx="30" cy="30" r="${R}" class="fg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-p)).toFixed(1)}"/></svg><span class="tm-num num">${Math.floor(left/60)}:${pad(left%60)}</span></div>
+    <div class="tm-mid"><div class="tm-lbl">휴식 중</div><div class="tm-next">${t.label?esc(t.label):'다음 세트 준비'}</div>
+      <div class="tm-btns"><button data-act="tminus" aria-label="휴식 15초 줄이기">−15초</button><button data-act="tplus" aria-label="휴식 15초 늘리기">+15초</button><button data-act="tsnd" aria-label="알림음 ${soundOn()?'끄기':'켜기'}">${soundOn()?'🔔':'🔕'}</button></div></div>
+    <button class="tm-skip" data-act="tskip" aria-label="휴식 건너뛰기">건너뛰기<br><span>›</span></button></div>`;
+  slot.innerHTML=html}
 
 /* ---------- 가족 피드 ---------- */
 function postCard(l){
@@ -1180,7 +1205,7 @@ async function onClick(ev){
    case'skin':{const t=a.dataset.s;lsSet('gn_skin',t);const m=M(S.me);const prev=m.profile?.theme;m.profile={...(m.profile||{}),theme:t};render();
      if(!(await act('gn_save_member',{p_id:S.me,p_name:m.name,p_color:m.color,p_profile:m.profile},'테마를 바꿨어요'))){m.profile.theme=prev}break}
    case'refresh':{a.classList.add('spin');const up=await checkUpdate(true);if(!up)await load();a.classList.remove('spin');return}
-   case'doUpdate':if(S.session){toast('진행 중인 운동을 먼저 저장하거나 취소하세요');return}await hardReload(a.dataset.v);return;
+   case'doUpdate':if(S.session)saveDraft();await hardReload(a.dataset.v);return;
    case'aiClearFile':S.ai.file=null;break;
    case'actForm':S.actForm=!S.actForm;break;
    case'avPick':avPick(a.dataset.id);return;
@@ -1197,16 +1222,18 @@ async function onClick(ev){
    case'loginBack':S.login={step:1,code:'',list:null,busy:false,err:''};break;
    case'logout':if(S.confirm!=='logout'){S.confirm='logout';break}try{await api('gn_logout',{p_token:S.token})}catch(e){}logoutLocal();lsSet('gn_sess',null);S.session=null;break;
    case'start':startSession(a.dataset.day);return;
-   case'setdone':{const en=S.session.entries[+a.dataset.e];const st=en.sets[+a.dataset.s];st.done=!st.done;if(st.done){if(st.r==='')st.r=en.target.max;startTimer(en.target.rest||90)}saveDraft();break}
+   case'setdone':{const en=S.session.entries[+a.dataset.e];const st=en.sets[+a.dataset.s];st.done=!st.done;if(st.done){if(st.r==='')st.r=en.target.max;const ei=+a.dataset.e;let nx='';const rem=en.sets.findIndex(x=>!x.done);
+       if(rem>=0)nx=`${EX[en.ex]?.n||''} ${rem+1}세트`;else{const ne=S.session.entries.slice(ei+1).find(e=>e.sets.some(x=>!x.done))||S.session.entries.find(e=>e.sets.some(x=>!x.done));nx=ne?`다음: ${EX[ne.ex]?.n||''}`:'마지막 세트 완료!'}
+       startTimer(en.target.rest||90,nx)}saveDraft();break}
    case'addset':{const en=S.session.entries[+a.dataset.e];const last=en.sets[en.sets.length-1]||{w:en.target.weight};en.sets.push({w:last.w,r:'',done:false});saveDraft();break}
    case'delset':S.session.entries[+a.dataset.e].sets.pop();saveDraft();break;
    case'cancelSess':if(S.confirm!=='sess'){S.confirm='sess';break}lsSet('gn_sess',null);S.session=null;S.timer=null;pushCancel();S.confirm=null;break;
    case'finish':a.disabled=true;await finishSession();return;
-   case'tplus':if(S.timer){S.timer.end+=15000;S.timer.pc=0;pushSchedule((S.timer.end-Date.now())/1000)}renderTimer();return;
+   case'tplus':if(S.timer){S.timer.end+=15000;S.timer.total=(S.timer.total||0)+15;pushSchedule((S.timer.end-Date.now())/1000);timerSave()}renderTimer();return;
    case'pushOn':await pushEnable();break;
    case'pushOff':await pushDisable();break;
    case'pushTest':try{await api('gn_push_schedule',{p_token:S.token,p_sec:5,p_title:'짐노트 테스트',p_body:'알림이 잘 와요 👍'});toast('5초 뒤 알림이 와요. 지금 앱을 내려보세요.')}catch(e){toast('예약 실패: '+(e.msg||''))}return;
-   case'tminus':if(S.timer){S.timer.end=Math.max(Date.now()+1000,S.timer.end-15000);S.timer.lastTick=null;S.timer.pc=0;pushSchedule((S.timer.end-Date.now())/1000)}renderTimer();return;
+   case'tminus':if(S.timer){S.timer.end=Math.max(Date.now()+1000,S.timer.end-15000);S.timer.lastTick=null;pushSchedule((S.timer.end-Date.now())/1000);timerSave()}renderTimer();return;
    case'tsnd':lsSet('gn_sound',!soundOn());if(soundOn()){beepTick();if(S.timer)pushSchedule((S.timer.end-Date.now())/1000)}else pushCancel();renderTimer();return;
    case'restAdj':{const en=S.session.entries[+a.dataset.e];en.target.rest=Math.min(300,Math.max(15,(+en.target.rest||90)+(+a.dataset.d)));saveDraft();break}
    case'pickOpen':S.sheet={type:'pick',mode:a.dataset.mode,e:a.dataset.e!=null?+a.dataset.e:null,persist:false};renderSheet();return;
@@ -1217,7 +1244,7 @@ async function onClick(ev){
      else{const n=Math.max(2,Math.min(4,S.session.entries[0]?.sets.length||3));S.session.entries.push({ex:id,added:true,persist:!!sh.persist,target:{weight:w,min:(reps||[8,12])[0],max:(reps||[8,12])[1],rest:['time','bw'].includes(e.k)?60:90},sets:[...Array(n)].map(()=>({w,r:'',done:false}))});toast(`${e.n} 추가`)}
      S.sheet=null;saveDraft();renderSheet();break}
    case'exDel':S.session.entries.splice(+a.dataset.e,1);saveDraft();break;
-   case'tskip':S.timer=null;pushCancel();renderTimer();return;
+   case'tskip':S.timer=null;timerSave();pushCancel();renderTimer();return;
    case'howto':S.sheet={type:'howto',ex:a.dataset.ex};renderSheet();return;
    case'closeSheet':case'closeSheetBg':S.sheet=null;renderSheet();return;
    case'gpart':S.guidePart=a.dataset.p;break;
@@ -1292,16 +1319,28 @@ document.addEventListener('submit',async ev=>{ev.preventDefault();const f=ev.tar
 
 /* ---------- 자동 업데이트 ---------- */
 async function serverVer(){try{const r=await fetch('./version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return null;return (await r.json()).v||null}catch(e){return null}}
-async function hardReload(v){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}
+async function hardReload(v){if(S.session)saveDraft();try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}catch(e){}
   try{const r=await navigator.serviceWorker?.getRegistration();await r?.update()}catch(e){}
   location.replace(location.pathname+'?v='+encodeURIComponent(v||Date.now()))}
 async function checkUpdate(manual){const v=await serverVer();
   if(!v||v===APP_VER){$('#updSlot').innerHTML='';if(manual)toast('최신 버전이에요');return false}
   const tried=lsGet('gn_upd_try')||{};const recent=tried.v===v&&Date.now()-tried.t<120000;
   if(manual||(!S.session&&!recent)){lsSet('gn_upd_try',{v,t:Date.now()});await hardReload(v);return true}
-  $('#updSlot').innerHTML=`<div class="updbar">새 버전이 있어요<button data-act="doUpdate" data-v="${esc(v)}">${S.session?'운동 저장 후 적용':'지금 적용'}</button></div>`;return true}
+  $('#updSlot').innerHTML=`<div class="updbar">새 버전이 있어요<button data-act="doUpdate" data-v="${esc(v)}">${S.session?'지금 적용 (운동은 이어져요)':'지금 적용'}</button></div>`;return true}
+/* ---------- iOS 고정 바 보정 ----------
+   iOS 홈화면 앱은 키보드를 닫은 뒤 레이아웃 뷰포트가 어긋나 하단 고정 바가 위로 떠 있는 버그가 있음.
+   visualViewport 기준으로 실제 화면 하단과의 차이를 계산해 바를 그만큼 옮긴다. */
+function vvFix(){const vv=window.visualViewport;const r=document.documentElement;if(!vv){r.style.setProperty('--vvy','0px');return}
+  const kb=r.classList.contains('kb');const dy=kb?0:Math.round(vv.offsetTop+vv.height-window.innerHeight);r.style.setProperty('--vvy',(Math.abs(dy)<2?0:dy)+'px')}
+const isTyping=el=>el&&(el.tagName==='TEXTAREA'||(el.tagName==='INPUT'&&!['checkbox','radio','range','file','button','submit'].includes(el.type))||el.tagName==='SELECT');
+document.addEventListener('focusin',e=>{if(isTyping(e.target)){document.documentElement.classList.add('kb');vvFix()}});
+document.addEventListener('focusout',()=>{setTimeout(()=>{if(!isTyping(document.activeElement)){document.documentElement.classList.remove('kb');window.scrollTo(window.scrollX,window.scrollY);vvFix();setTimeout(vvFix,350)}},60)});
+if(window.visualViewport){visualViewport.addEventListener('resize',vvFix);visualViewport.addEventListener('scroll',vvFix)}
+window.addEventListener('scroll',vvFix,{passive:true});window.addEventListener('orientationchange',()=>setTimeout(vvFix,400));vvFix();
+
 /* ---------- 시작 ---------- */
 S.session=(()=>{const d=lsGet('gn_sess');return d&&d.member===S.me?d:null})();
+if(S.session?.timer&&S.session.timer.end>Date.now())startTimer(0,'',{...S.session.timer,lastTick:null});
 if(location.search.includes('v='))history.replaceState(null,'',location.pathname);
 if(S.token)load();else render();
 checkUpdate(false);
