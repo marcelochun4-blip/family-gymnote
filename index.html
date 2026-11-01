@@ -194,6 +194,9 @@ a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-conten
 .tm-skip span{font-size:20px;line-height:1}
 .timer.urgent{border-color:var(--me);box-shadow:0 0 0 3px color-mix(in srgb,var(--me) 35%,transparent),0 10px 30px rgba(0,0,0,.2)}.timer.urgent .tm-num{color:var(--me)}
 html.kb .tabbar{display:none}
+.hold-go{width:100%;min-height:44px;border-radius:12px;background:var(--me);color:var(--me-ink);border:0;font-weight:800;font-size:15px}
+.hold-go[disabled]{background:var(--sunk);color:var(--muted)}
+.timer.hold .tm-ring .fg{stroke:var(--good)}.timer.hold .tm-lbl{color:var(--good)}.timer.hold .tm-skip{background:var(--good);color:#fff}
 body:has(#timerSlot .timer) main{padding-bottom:110px}html.kb .timer{bottom:8px}
 
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:11;transform:translate3d(0,var(--vvy,0px),0);background:var(--surface);border-top:1px solid var(--line);
@@ -388,7 +391,7 @@ ol.cues{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 
 <script>
 "use strict";
-const APP_VER='2026.11.01-0751';
+const APP_VER='2026.11.01-0816';
 const SB_URL='https://xteryrewqvzqazcnybob.supabase.co';
 const SB_KEY='sb_publishable_S8R-CFdnR62VIY7x8t9vAA_lBdFPXNK';
 
@@ -903,7 +906,7 @@ function vSession(){
     h+=`<section class="ex ${allDone?'done':''}"><div class="exhead">${hasImg(en.ex)?`<img class="thumb" src="${imgSrc(en.ex,0)}" alt="" loading="lazy">`:'<span class="thumb"></span>'}<div><h3>${esc(e.n)}</h3><div class="small muted">목표 ${esc(targetText({ex:en.ex,sets:en.sets.length,min:en.target.min,max:en.target.max,weight:en.target.weight}))}${en.added?' · 추가한 운동':''}${en.orig&&en.orig!==en.ex?` · ${esc(EX[en.orig]?.n||'')} 대체`:''}</div>
       <div class="rest-adj"><span class="small muted">휴식</span><button class="btn sm ghost" data-act="restAdj" data-e="${ei}" data-d="-15" aria-label="휴식 15초 줄이기">−15</button><b class="num">${en.target.rest}초</b><button class="btn sm ghost" data-act="restAdj" data-e="${ei}" data-d="15" aria-label="휴식 15초 늘리기">+15</button></div></div>
       <div class="col-btns"><button class="btn sm" data-act="howto" data-ex="${en.ex}">사용법</button><button class="btn sm ghost" data-act="pickOpen" data-mode="swap" data-e="${ei}">바꾸기</button></div></div><div class="sets">`;
-    en.sets.forEach((st,si)=>{h+=`<div class="set"><span class="idx">${si+1}</span>${['load','assist'].includes(e.k)?`<div class="field"><input id="w_${ei}_${si}" inputmode="decimal" data-in="w" data-e="${ei}" data-s="${si}" value="${esc(st.w)}" aria-label="${si+1}세트 무게"><span>${wl}</span></div>`:`<div class="field"><span>맨몸</span></div>`}
+    en.sets.forEach((st,si)=>{h+=`<div class="set"><span class="idx">${si+1}</span>${['load','assist'].includes(e.k)?`<div class="field"><input id="w_${ei}_${si}" inputmode="decimal" data-in="w" data-e="${ei}" data-s="${si}" value="${esc(st.w)}" aria-label="${si+1}세트 무게"><span>${wl}</span></div>`:(e.k==='time'?`<button class="btn hold-go" data-act="holdGo" data-e="${ei}" data-s="${si}" ${st.done?'disabled':''} aria-label="${si+1}세트 카운트다운 시작">${st.done?'완료':'▶ 시작'}</button>`:`<div class="field"><span>맨몸</span></div>`)}
       <div class="field"><input id="r_${ei}_${si}" inputmode="numeric" data-in="r" data-e="${ei}" data-s="${si}" value="${esc(st.r)}" placeholder="${en.target.max}" aria-label="${si+1}세트 ${rl}"><span>${rl}</span></div>
       <button class="check" data-act="setdone" data-e="${ei}" data-s="${si}" aria-pressed="${st.done}" aria-label="${si+1}세트 완료">✓</button></div>`});
     h+=`</div><div class="row"><button class="btn sm" data-act="addset" data-e="${ei}">+ 세트</button>${en.sets.length>1?`<button class="btn sm ghost" data-act="delset" data-e="${ei}">− 세트</button>`:''}${en.added&&!en.sets.some(x=>x.done)?`<button class="btn sm ghost" data-act="exDel" data-e="${ei}">운동 빼기</button>`:''}</div></section>`});
@@ -960,7 +963,8 @@ async function pushEnable(){
 async function pushDisable(){try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();
   if(sub){await api('gn_push_unsubscribe',{p_token:S.token,p_endpoint:sub.endpoint}).catch(()=>{});await sub.unsubscribe()}}catch(e){}lsSet('gn_push',false);toast('백그라운드 알림을 껐어요')}
 let pushT;
-function pushSchedule(sec){if(!pushOn()||!soundOn()||!S.token)return;clearTimeout(pushT);pushT=setTimeout(()=>{api('gn_push_schedule',{p_token:S.token,p_sec:Math.max(3,Math.round(sec))}).catch(()=>{})},300)}
+function pushSchedule(sec,title,body){if(!pushOn()||!soundOn()||!S.token)return;const t=S.timer;if(!title&&t?.kind==='hold'){title=`${t.exName||'운동'} 끝!`;body=`${t.total}초 완료 💪 이제 휴식하세요`}
+  clearTimeout(pushT);pushT=setTimeout(()=>{api('gn_push_schedule',{p_token:S.token,p_sec:Math.max(3,Math.round(sec)),...(title?{p_title:title,p_body:body||''}:{})}).catch(()=>{})},300)}
 function pushCancel(){clearTimeout(pushT);if(!pushOn()||!S.token)return;api('gn_push_cancel',{p_token:S.token}).catch(()=>{})}
 function pushCard(){if(!pushSupported()&&!isStandalone())return'';const on=pushOn();
   return`<section class="card"><div class="row between"><h3>백그라운드 휴식 알림</h3><span class="pill ${on?'good':''}">${on?'켜짐':'꺼짐'}</span></div>
@@ -975,17 +979,34 @@ function tone(freq,at,dur,vol){if(!actx)return;const o=actx.createOscillator(),g
 function beepTick(){if(!soundOn()||!actx)return;try{if(actx.state==='suspended')actx.resume();tone(660,actx.currentTime,.12,.25)}catch(e){}}
 function beepEnd(){if(!soundOn()||!actx)return;try{if(actx.state==='suspended')actx.resume();const t=actx.currentTime;tone(880,t,.22,.55);tone(880,t+.3,.22,.55);tone(1320,t+.6,.45,.6)}catch(e){}}
 function startTimer(sec,label,resume){S.timer=resume||{end:Date.now()+sec*1000,total:sec,label:label||'',lastTick:null};if(!resume)pushSchedule(sec);timerSave();timerLoop()}
-function timerSave(){if(S.session){S.session.timer=S.timer?{end:S.timer.end,total:S.timer.total,label:S.timer.label}:null;saveDraft()}}
+function timerSave(){if(S.session){S.session.timer=S.timer?{end:S.timer.end,total:S.timer.total,label:S.timer.label,kind:S.timer.kind,ei:S.timer.ei,si:S.timer.si,exName:S.timer.exName,start:S.timer.start}:null;saveDraft()}}
 function timerLoop(){clearInterval(tick);tick=setInterval(()=>{if(!S.timer){clearInterval(tick);return}
-  const late=Date.now()-S.timer.end;if(late>1500){S.timer=null;timerSave();clearInterval(tick);renderTimer();return} // 백그라운드에서 돌아온 경우: 푸시가 이미 울렸으니 조용히 정리
+  const late=Date.now()-S.timer.end;if(late>1500){const t=S.timer;S.timer=null;clearInterval(tick);if(t.kind==='hold'){holdDone(t,t.total);return}timerSave();renderTimer();return} // 백그라운드에서 돌아온 경우: 푸시가 이미 울렸으니 조용히 정리
   const left=Math.ceil((S.timer.end-Date.now())/1000);
   if(left>0&&left<=3&&S.timer.lastTick!==left){S.timer.lastTick=left;beepTick()}
-  if(Date.now()>=S.timer.end){S.timer=null;timerSave();clearInterval(tick);beepEnd();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}toast('휴식 끝, 다음 세트!')}renderTimer()},200);renderTimer()}
+  if(S.timer.kind==='hold'){const pre=Math.ceil((S.timer.start-Date.now())/1000);if(pre>0&&S.timer.lastPre!==pre){S.timer.lastPre=pre;beepTick()}else if(pre<=0&&!S.timer.go){S.timer.go=1;beepEnd()}}
+  if(Date.now()>=S.timer.end){const t=S.timer;S.timer=null;clearInterval(tick);beepEnd();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+    if(t.kind==='hold'){holdDone(t,t.total);return}timerSave();toast('휴식 끝, 다음 세트!')}renderTimer()},200);renderTimer()}
+function restAfter(ei){const en=S.session.entries[ei];let nx='';const rem=en.sets.findIndex(x=>!x.done);
+  if(rem>=0)nx=`${EX[en.ex]?.n||''} ${rem+1}세트`;else{const ne=S.session.entries.slice(ei+1).find(e=>e.sets.some(x=>!x.done))||S.session.entries.find(e=>e.sets.some(x=>!x.done));nx=ne?`다음: ${EX[ne.ex]?.n||''}`:'마지막 세트 완료!'}
+  startTimer(en.target.rest||60,nx)}
+function holdStart(ei,si){const en=S.session.entries[ei],st=en.sets[si];const sec=Math.max(5,Math.min(600,+st.r||+en.target.max||30));const name=EX[en.ex]?.n||'';
+  pushCancel();S.timer={kind:'hold',end:Date.now()+(sec+3)*1000,start:Date.now()+3000,total:sec,ei,si,exName:name,label:`${name} ${si+1}세트`,lastTick:null};pushSchedule(sec+3);timerSave();timerLoop();render()}
+// 버티기 종료(시간 다 됨 또는 '완료' 누름): 실제 버틴 초를 기록하고 세트 체크 → 휴식 타이머로
+function holdDone(t,secs){const en=S.session?.entries[t.ei];if(!en){renderTimer();return}const st=en.sets[t.si];if(st){st.r=String(Math.max(1,Math.round(secs)));st.done=true}
+  toast(`${t.exName} ${Math.round(secs)}초 완료!`);saveDraft();restAfter(t.ei);render()}
 function renderTimer(){const t=S.timer,slot=$('#timerSlot');if(!t||S.tab!=='work'){slot.innerHTML='';slot._key=null;return}
-  const ms=Math.max(0,t.end-Date.now()),left=Math.ceil(ms/1000),tot=Math.max(1,t.total||left),p=Math.min(1,ms/1000/tot),R=26,C=2*Math.PI*R;
-  const key=(t.label||'')+'|'+soundOn(),el=slot.firstElementChild;
-  if(el&&slot._key===key){el.querySelector('.tm-num').textContent=`${Math.floor(left/60)}:${pad(left%60)}`;el.querySelector('.fg').setAttribute('stroke-dashoffset',(C*(1-p)).toFixed(1));el.classList.toggle('urgent',left<=3);return}
+  const hold=t.kind==='hold',pre=hold?Math.ceil((t.start-Date.now())/1000):0;
+  const ms=Math.max(0,t.end-Date.now()),left=Math.ceil(ms/1000),tot=Math.max(1,t.total||left),p=hold&&pre>0?1:Math.min(1,ms/1000/tot),R=26,C=2*Math.PI*R;
+  const numTxt=hold&&pre>0?String(pre):`${Math.floor(left/60)}:${pad(left%60)}`;
+  const key=(t.label||'')+'|'+soundOn()+'|'+(hold?(pre>0?'pre':'go'):'rest'),el=slot.firstElementChild;
+  if(el&&slot._key===key){el.querySelector('.tm-num').textContent=numTxt;el.querySelector('.fg').setAttribute('stroke-dashoffset',(C*(1-p)).toFixed(1));el.classList.toggle('urgent',left<=3);return}
   slot._key=key;const urgent=left<=3?' urgent':'';
+  if(hold){slot.innerHTML=`<div class="timer hold${urgent}" role="timer" aria-live="off">
+    <div class="tm-ring"><svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="${R}" class="bg"/><circle cx="30" cy="30" r="${R}" class="fg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-p)).toFixed(1)}"/></svg><span class="tm-num num">${numTxt}</span></div>
+    <div class="tm-mid"><div class="tm-lbl">${pre>0?'준비':'버티는 중 🔥'}</div><div class="tm-next">${esc(t.label)} · 목표 ${t.total}초</div>
+      <div class="tm-btns"><button data-act="holdCancel">취소</button><button data-act="tsnd" aria-label="알림음 ${soundOn()?'끄기':'켜기'}">${soundOn()?'🔔':'🔕'}</button></div></div>
+    <button class="tm-skip" data-act="holdStop" aria-label="지금까지 기록하고 완료">완료<br><span>✓</span></button></div>`;return}
   const html=`<div class="timer${urgent}" role="timer" aria-live="off">
     <div class="tm-ring"><svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="${R}" class="bg"/><circle cx="30" cy="30" r="${R}" class="fg" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-p)).toFixed(1)}"/></svg><span class="tm-num num">${Math.floor(left/60)}:${pad(left%60)}</span></div>
     <div class="tm-mid"><div class="tm-lbl">휴식 중</div><div class="tm-next">${t.label?esc(t.label):'다음 세트 준비'}</div>
@@ -1245,6 +1266,9 @@ async function onClick(ev){
      S.sheet=null;saveDraft();renderSheet();break}
    case'exDel':S.session.entries.splice(+a.dataset.e,1);saveDraft();break;
    case'tskip':S.timer=null;timerSave();pushCancel();renderTimer();return;
+   case'holdGo':holdStart(+a.dataset.e,+a.dataset.s);return;
+   case'holdStop':{const t=S.timer;if(!t||t.kind!=='hold')return;S.timer=null;clearInterval(tick);pushCancel();const secs=Math.max(0,(Date.now()-t.start)/1000);if(secs<1){timerSave();renderTimer();toast('시작 전이라 기록하지 않았어요');return}holdDone(t,Math.min(t.total,secs));return}
+   case'holdCancel':S.timer=null;clearInterval(tick);pushCancel();timerSave();renderTimer();toast('카운트다운을 취소했어요');return;
    case'howto':S.sheet={type:'howto',ex:a.dataset.ex};renderSheet();return;
    case'closeSheet':case'closeSheetBg':S.sheet=null;renderSheet();return;
    case'gpart':S.guidePart=a.dataset.p;break;
